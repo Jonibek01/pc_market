@@ -3,11 +3,13 @@ package uz.app.pc_market.entity;
 import jakarta.persistence.*;
 
 @Entity
-@MappedSuperclass
-public class BasketItem extends ABCEntity{
+@Table(name = "basket_items")
+public class BasketItem extends ABCEntity {
+
     @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
+    @JoinColumn(name = "basket_id", nullable = false)
     private Basket basket;
+
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
@@ -18,4 +20,7 @@ public class BasketItem extends ABCEntity{
     @Column(nullable = false)
     private Double unitPrice;
 
+    public Double getTotalPrice() {
+        return unitPrice * quantity;
+    }
 }

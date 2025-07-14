@@ -1,22 +1,28 @@
 package uz.app.pc_market.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 import uz.app.pc_market.entity.enums.BasketStatus;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
-@MappedSuperclass
-public class Basket extends ABCEntity{
-    @ManyToOne
-    private Product product;
+@Table(name = "baskets")
+public class Basket extends ABCEntity {
+
     @ManyToOne
     private User user;
-    private BasketStatus basketStatus;
+
+    @Enumerated(EnumType.STRING)
+    private BasketStatus basketStatus = BasketStatus.ACTIVE;
+
     private LocalDateTime createdTime = LocalDateTime.now();
-    private Integer totalAmount;
-    private Double totalPrice;
+
+    @OneToMany(mappedBy = "basket", cascade = CascadeType.ALL)
+    private List<BasketItem> items = new ArrayList<>();
+
+    private Double totalPrice = 0.0;
+    private Integer totalAmount = 0;
 }

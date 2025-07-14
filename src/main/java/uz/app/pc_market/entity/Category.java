@@ -13,5 +13,5 @@ public class Category extends ABCEntity{
     @JoinColumn(name = "parent_id")
     private Category parentCategory;
     @OneToMany(mappedBy = "category")
-    private List<Product> products;
+    private List<SubCategory> subCategories;
 }

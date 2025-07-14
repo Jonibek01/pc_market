@@ -2,9 +2,9 @@ package uz.app.pc_market.entity;
 
 import jakarta.persistence.*;
 
-@Entity
-public class ABCEntity {
+@MappedSuperclass
+public abstract class ABCEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 }

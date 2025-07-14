@@ -1,17 +1,19 @@
 package uz.app.pc_market.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 import uz.app.pc_market.entity.enums.PaymentStatus;
 
 @Entity
-@MappedSuperclass
+@Table(name = "cards")
 public class Card extends ABCEntity {
+
     private String number;
     private String password;
     private Double amount;
+
+    @Enumerated(EnumType.STRING)
     private PaymentStatus cardStatus;
+
     @ManyToOne
     private User cardHolder;
 }
