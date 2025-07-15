@@ -1,10 +1,16 @@
 package uz.app.pc_market.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 import uz.app.pc_market.entity.enums.ProductStatus;
 
 import java.util.List;
 
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "products")
 public class Product extends ABCEntity {

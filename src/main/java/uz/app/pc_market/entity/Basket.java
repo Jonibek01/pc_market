@@ -1,6 +1,7 @@
 package uz.app.pc_market.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 import uz.app.pc_market.entity.enums.BasketStatus;
 
 import java.time.LocalDateTime;
@@ -8,6 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "baskets")
 public class Basket extends ABCEntity {

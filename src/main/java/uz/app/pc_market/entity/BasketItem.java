@@ -1,7 +1,13 @@
 package uz.app.pc_market.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "basket_items")
 public class BasketItem extends ABCEntity {

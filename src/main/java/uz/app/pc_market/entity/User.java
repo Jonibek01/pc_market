@@ -1,12 +1,15 @@
 package uz.app.pc_market.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import uz.app.pc_market.entity.enums.Role;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "users")
 public class User extends ABCEntity {
@@ -21,15 +24,15 @@ public class User extends ABCEntity {
     private Double balance;
     private String confCode;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Basket> baskets;
 
-    @OneToMany(mappedBy = "cardHolder")
+    @OneToMany(mappedBy = "cardHolder", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Card> cards;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Comment> comments;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<History> histories;
 }
