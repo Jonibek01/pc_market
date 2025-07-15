@@ -15,6 +15,7 @@ import java.util.List;
 public class User extends ABCEntity {
     private String name;
     private String email;
+    private String fullName;
     private String password;
 
     @Enumerated(EnumType.STRING)
