@@ -1,9 +1,11 @@
 package uz.app.pc_market.controller.impl;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import uz.app.pc_market.controller.SignInController;
 import uz.app.pc_market.controller.SignUpController;
 import uz.app.pc_market.entity.User;
@@ -25,13 +27,15 @@ public class SignInControllerImpl implements SignInController {
     @Override
     public String signIn(@RequestParam("email") String email,
                          @RequestParam("password") String password,
-                         Model model) {
+                         Model model, HttpSession session) {
         Optional<User> userByEmailAndPassword = authRepository.findUserByEmailAndPassword(email, password);
         if (userByEmailAndPassword.isEmpty()) {
             model.addAttribute("message", "user not found!");
             return "error";
         }
+
         User user = userByEmailAndPassword.get();
+        session.setAttribute("currentUser", user);
         if (user.getEmail().equals(email) && user.getPassword().equals(password)) {
             if (user.getRole().equals(Role.SELLER)) {
                 return "redirect:/seller-cabinet";

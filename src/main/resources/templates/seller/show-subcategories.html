@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>All SubCategories</title>
+</head>
+<body>
+<h1>SubCategories</h1>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Parent Category</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="sc, iter : ${subCategories}">
+        <td th:text="${iter.count}">1</td>
+        <td th:text="${sc.name}">Sub</td>
+        <td th:text="${sc.category.name}">Parent</td>
+    </tr>
+    </tbody>
+</table>
+
+<a href="/seller-cabinet">Back to Cabinet</a>
+</body>
+</html>

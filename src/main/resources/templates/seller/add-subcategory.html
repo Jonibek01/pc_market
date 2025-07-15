@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Add SubCategory</title>
+</head>
+<body>
+<h1>Add SubCategory</h1>
+<form action="/add-subcategory" method="post">
+    <label for="name">SubCategory Name:</label>
+    <input type="text" name="name" id="name" required><br><br>
+
+    <label for="category">Select Category:</label>
+    <select name="categoryId" id="category" required>
+        <option value="" disabled selected>Select a category</option>
+        <option th:each="cat : ${categories}"
+                th:value="${cat.id}"
+                th:text="${cat.name}">
+        </option>
+    </select><br><br>
+
+    <button type="submit">Save</button>
+</form>
+
+<a href="/seller-cabinet">Back</a>
+</body>
+</html>
