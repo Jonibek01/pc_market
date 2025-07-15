@@ -10,8 +10,9 @@ public interface SignUpController {
     String showSignUpPage();
 
     @PostMapping
-    String signUp(@RequestParam("fullname") String fullName,
+    String signUp(@RequestParam("name") String fullName,
                   @RequestParam("email") String email,
                   @RequestParam("password") String password,
+                  @RequestParam("balance") Double balance,
                   Model model);
 }

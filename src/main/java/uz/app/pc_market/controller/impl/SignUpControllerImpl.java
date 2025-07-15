@@ -17,29 +17,30 @@ public class SignUpControllerImpl implements SignUpController {
 
     @Override
     public String showSignUpPage() {
-        return "sign-up"; // templates/sign-up.html bo'lishi kerak
+        return "sign-up";
     }
 
     @Override
-    public String signUp(@RequestParam("fullname") String fullName,
+    public String signUp(@RequestParam("name") String fullName,
                          @RequestParam("email") String email,
                          @RequestParam("password") String password,
+                         @RequestParam("balance") Double balance,
                          Model model) {
 
-
-        if (authRepository.findUserByEmailAndPassword(email, password).isPresent()) {
-            model.addAttribute("error", "Bu email allaqachon mavjud");
+        if (authRepository.findByEmail(email).isPresent()) {
+            model.addAttribute("error", "Bu email allaqachon mavjud!");
             return "sign-up";
         }
 
+        User user = User.builder()
+                .name(fullName)
+                .email(email)
+                .password(password)
+                .balance(balance)
+                .role(Role.USER)
+                .build();
 
-        User newUser = new User();
-        newUser.setFullName(fullName);
-        newUser.setEmail(email);
-        newUser.setPassword(password);
-        newUser.setRole(Role.USER); // Default role
-
-        authRepository.save(newUser);
+        authRepository.save(user);
 
         return "redirect:/sign-in";
     }
