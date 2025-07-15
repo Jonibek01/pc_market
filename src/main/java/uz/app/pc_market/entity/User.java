@@ -1,11 +1,14 @@
 package uz.app.pc_market.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import uz.app.pc_market.entity.enums.Role;
 
 import java.util.List;
-
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Entity
 @Table(name = "users")

@@ -1,12 +1,18 @@
 package uz.app.pc_market.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import uz.app.pc_market.entity.enums.BasketStatus;
 
 import java.time.LocalDateTime;
-
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@MappedSuperclass
 public class History extends ABCEntity{
     @ManyToOne
     private User user;
