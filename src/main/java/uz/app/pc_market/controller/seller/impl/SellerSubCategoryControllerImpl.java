@@ -18,7 +18,7 @@ public class SellerSubCategoryControllerImpl implements SellerSubCategoryControl
 
     @Override
     public String addSubCategory(Model model) {
-        return "seller/add-subcategory";
+        return sellerSubCategoryService.addSubCategory(model);
     }
 
     @Override

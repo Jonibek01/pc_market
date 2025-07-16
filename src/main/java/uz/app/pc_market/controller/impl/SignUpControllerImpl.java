@@ -21,7 +21,7 @@ public class SignUpControllerImpl implements SignUpController {
     }
 
     @Override
-    public String signUp(@RequestParam("name") String fullName,
+    public String signUp(@RequestParam("name") String name,
                          @RequestParam("email") String email,
                          @RequestParam("password") String password,
                          @RequestParam("balance") Double balance,
@@ -33,15 +33,16 @@ public class SignUpControllerImpl implements SignUpController {
         }
 
         User user = User.builder()
-                .name(fullName)
+                .name(name)
                 .email(email)
                 .password(password)
                 .balance(balance)
                 .role(Role.USER)
+                .enabled(true)
                 .build();
 
         authRepository.save(user);
-
+        System.out.println("user successfully saved " + user);
         return "redirect:/sign-in";
     }
 }

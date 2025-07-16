@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import uz.app.pc_market.entity.Category;
 import uz.app.pc_market.entity.SubCategory;
 import uz.app.pc_market.repository.CategoryRepository;
+import uz.app.pc_market.repository.SellerRepository;
 import uz.app.pc_market.repository.SubCategoryRepository;
 import uz.app.pc_market.service.seller.SellerCategoryService;
 import uz.app.pc_market.service.seller.SellerSubCategoryService;
@@ -19,6 +20,7 @@ public class SellerSubCategoryServiceImpl implements SellerSubCategoryService {
 
      final SubCategoryRepository subCategoryRepository;
      final CategoryRepository categoryRepository;
+    private final SellerRepository sellerRepository;
 
     @Override
     public String getSubCategories(Model model) {
@@ -29,7 +31,7 @@ public class SellerSubCategoryServiceImpl implements SellerSubCategoryService {
 
     @Override
     public String addSubCategory(Model model) {
-        model.addAttribute("categories", categoryRepository);
+        model.addAttribute("categories", sellerRepository.findAll());
         return "seller/add-subcategory";
     }
 
