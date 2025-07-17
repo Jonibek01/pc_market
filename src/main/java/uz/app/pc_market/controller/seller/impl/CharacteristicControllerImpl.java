@@ -19,4 +19,5 @@ public class CharacteristicControllerImpl implements SellerCharacteristicControl
     public String createCharacteristic(String name, CharacteristicType type, Model model) {
         return sellerCharacteristicService.createCharacteristic(name, type, model);
     }
+
 }
