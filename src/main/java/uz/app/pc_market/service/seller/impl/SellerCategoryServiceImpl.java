@@ -16,7 +16,7 @@ public class SellerCategoryServiceImpl implements SellerCategoryService {
     public String getCategories(Model model) {
         List<Category> all = sellerRepository.findAll();
         if (all.isEmpty()){
-            model.addAttribute("error", "categories not found");
+            model.addAttribute("errorMessage", "categories not found");
             return "error";
         }
         model.addAttribute("categories", all);
@@ -27,7 +27,7 @@ public class SellerCategoryServiceImpl implements SellerCategoryService {
     @Override
     public String createCategory(String name, Model model) {
         if (sellerRepository.existsByNameContainingIgnoreCase(name)) {
-            model.addAttribute("error", "Category already exists!");
+            model.addAttribute("errorMessage", "Category already exists!");
             return "error";
         }
 

@@ -5,10 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import uz.app.pc_market.entity.Category;
 import uz.app.pc_market.entity.SubCategory;
-import uz.app.pc_market.repository.CategoryRepository;
 import uz.app.pc_market.repository.SellerRepository;
 import uz.app.pc_market.repository.SubCategoryRepository;
-import uz.app.pc_market.service.seller.SellerCategoryService;
 import uz.app.pc_market.service.seller.SellerSubCategoryService;
 
 import java.util.List;
@@ -19,7 +17,6 @@ import java.util.Optional;
 public class SellerSubCategoryServiceImpl implements SellerSubCategoryService {
 
      final SubCategoryRepository subCategoryRepository;
-     final CategoryRepository categoryRepository;
     private final SellerRepository sellerRepository;
 
     @Override
@@ -31,15 +28,20 @@ public class SellerSubCategoryServiceImpl implements SellerSubCategoryService {
 
     @Override
     public String addSubCategory(Model model) {
-        model.addAttribute("categories", sellerRepository.findAll());
+        List<Category> all = sellerRepository.findAll();
+        if(all.isEmpty()){
+            model.addAttribute("errorMessage", "Category not found!");
+            return "error";
+        }
+        model.addAttribute("categories", all);
         return "seller/add-subcategory";
     }
 
     @Override
     public String createSubCategory(String name, Long categoryId, Model model) {
-        Optional<Category> categoryOptional = categoryRepository.findById(categoryId);
+        Optional<Category> categoryOptional = sellerRepository.findById(categoryId);
         if (categoryOptional.isEmpty()) {
-            model.addAttribute("error", "Category not found!");
+            model.addAttribute("errorMessage", "Category not found!");
             return "error";
         }
 
@@ -48,6 +50,6 @@ public class SellerSubCategoryServiceImpl implements SellerSubCategoryService {
         subCategory.setCategory(categoryOptional.get());
 
         subCategoryRepository.save(subCategory);
-        return "redirect:/add-subcategories";
+        return "redirect:/add-subcategory";
     }
 }
