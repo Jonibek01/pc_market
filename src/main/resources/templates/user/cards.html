@@ -26,13 +26,14 @@
                 <td th:text="${card.amount}"></td>
                 <td th:text="${card.cardStatus}"></td>
                 <td>
-                    <a th:href="@{/auth/user/card/update(cardId=${card.id})}" class="btn btn-primary btn-sm">Update</a>
-                    <a th:href="@{/auth/user/card/delete(cardId=${card.id}, userId=${userId})}" class="btn btn-danger btn-sm">Delete</a>
+                    <a th:href="@{/auth/user/card/update-card(cardId=${card.id})}" class="btn btn-primary btn-sm">Update</a>
+                    <a th:href="@{/auth/user/card/delete-card(cardId=${card.id})}" class="btn btn-danger btn-sm">Delete</a>
                 </td>
             </tr>
             </tbody>
         </table>
-        <a th:href="@{/auth/user/card/add(userId=${userId})}" class="btn btn-success">Add New Card</a>
+        <a th:href="@{/auth/user/card/add-card}" class="btn btn-success">Add New Card</a>
+        <a th:href="@{/auth/logout}" class="btn btn-secondary">Logout</a>
     </div>
 </div>
 </body>

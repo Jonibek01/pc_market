@@ -8,7 +8,7 @@
 <div class="container">
     <h2>Update Card</h2>
     <div th:if="${success == false}" class="alert alert-danger" th:text="${message}"></div>
-    <form th:action="@{/auth/user/card/update(cardId=${cardId})}" method="post">
+    <form th:action="@{/auth/user/card/update-card(cardId=${cardId})}" method="post">
         <input type="hidden" name="cardId" th:value="${cardId}"/>
         <div class="form-group">
             <label for="balance">New Balance</label>

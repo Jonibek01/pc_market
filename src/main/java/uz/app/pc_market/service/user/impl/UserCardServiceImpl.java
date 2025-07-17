@@ -25,25 +25,34 @@ public class UserCardServiceImpl implements UserCardService {
         if (userOptional.isEmpty()) {
             return ResponseMessage.builder()
                     .success(false)
-                    .message("user not found")
+                    .message("User not found")
                     .data(null)
                     .build();
         }
         List<Card> cards = userCardRepository.findByCardHolderId(userId);
         return ResponseMessage.builder()
                 .success(true)
+                .message("Cards retrieved successfully")
                 .data(cards)
-                .message("cards retrieved successfully")
                 .build();
     }
 
     @Override
-    public ResponseMessage addUserCard(Long userId, Card card, Model model) {
+    public ResponseMessage addUserCard(Long userId, Card card) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isEmpty()) {
             return ResponseMessage.builder()
                     .success(false)
-                    .message("user not found")
+                    .message("User not found")
+                    .data(null)
+                    .build();
+        }
+        if (card.getNumber() == null || card.getNumber().isEmpty() ||
+                card.getPassword() == null || card.getPassword().isEmpty() ||
+                card.getCardStatus() == null) {
+            return ResponseMessage.builder()
+                    .success(false)
+                    .message("Card number, password, and status are required")
                     .data(null)
                     .build();
         }
@@ -52,7 +61,7 @@ public class UserCardServiceImpl implements UserCardService {
         Card savedCard = userCardRepository.save(card);
         return ResponseMessage.builder()
                 .success(true)
-                .message("card added successfully")
+                .message("Card added successfully")
                 .data(savedCard)
                 .build();
     }
@@ -63,16 +72,16 @@ public class UserCardServiceImpl implements UserCardService {
         if (cardOptional.isEmpty()) {
             return ResponseMessage.builder()
                     .success(false)
-                    .message("card not found")
+                    .message("Card not found")
                     .data(null)
                     .build();
         }
         Card currentCard = cardOptional.get();
-        currentCard.setAmount(currentCard.getAmount() + balance);
+        currentCard.setAmount(balance);
         Card updatedCard = userCardRepository.save(currentCard);
         return ResponseMessage.builder()
                 .success(true)
-                .message("card updated successfully")
+                .message("Card updated successfully")
                 .data(updatedCard)
                 .build();
     }
@@ -80,29 +89,26 @@ public class UserCardServiceImpl implements UserCardService {
     @Override
     public ResponseMessage deleteUserCard(Long cardId, Long userId) {
         Optional<Card> cardOptional = userCardRepository.findById(cardId);
-    if (cardOptional.isPresent()) {
-        Card card = cardOptional.get();
-        if (card.getCardHolder().getId().equals(userId)) {
-            userCardRepository.delete(card);
-            return ResponseMessage.builder()
-                    .success(true)
-                    .message("card deleted successfully")
-                    .data(null)
-                    .build();
-        } else {
+        if (cardOptional.isEmpty()) {
             return ResponseMessage.builder()
                     .success(false)
-                    .message("you cannot delete this card")
+                    .message("Card not found")
                     .data(null)
                     .build();
         }
-    }
-    else {
+        Card card = cardOptional.get();
+        if (!card.getCardHolder().getId().equals(userId)) {
+            return ResponseMessage.builder()
+                    .success(false)
+                    .message("You cannot delete this card")
+                    .data(null)
+                    .build();
+        }
+        userCardRepository.delete(card);
         return ResponseMessage.builder()
-                .success(false)
-                .message("card not found")
+                .success(true)
+                .message("Card deleted successfully")
                 .data(null)
                 .build();
-    }
     }
 }

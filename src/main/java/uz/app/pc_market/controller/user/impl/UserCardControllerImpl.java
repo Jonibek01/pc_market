@@ -1,8 +1,11 @@
 package uz.app.pc_market.controller.user.impl;
 
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import uz.app.pc_market.controller.user.UserCardController;
 import uz.app.pc_market.dto.userdto.ResponseMessage;
 import uz.app.pc_market.entity.Card;
@@ -13,61 +16,94 @@ import uz.app.pc_market.service.user.UserCardService;
 public class UserCardControllerImpl implements UserCardController {
     private final UserCardService userCardService;
 
-    @Override
-    public String addCard(Long userId, Card card, Model model) {
-        ResponseMessage response = userCardService.addUserCard(userId, card, model);
-        model.addAttribute("success", response.getSuccess());
-        model.addAttribute("message", response.getMessage());
-        model.addAttribute("cards", response.getData());
-        model.addAttribute("userId", userId);
-
-        return "user/cards";
+    private Long getCurrentUserId(HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            throw new IllegalStateException("User not logged in");
+        }
+        return userId;
     }
 
     @Override
-    public String CardPage(Long userId, Model model) {
-        model.addAttribute("userId", userId);
+    public String showAddCardForm(Model model) {
         model.addAttribute("card", new Card());
         return "user/add-card";
     }
 
     @Override
-    public String getAllCards(Long userId, Model model) {
+    public String addCard(Card card, Model model, HttpSession session) {
+        Long userId = getCurrentUserId(session);
+        if (userId == null) {
+            return "redirect:/auth/login";
+        }
+        if (card.getNumber() == null || card.getNumber().isEmpty() ||
+                card.getPassword() == null || card.getPassword().isEmpty() ||
+                card.getAmount() == null || card.getCardStatus() == null) {
+            model.addAttribute("success", false);
+            model.addAttribute("message", "All fields are required");
+            model.addAttribute("card", card);
+            return "user/add-card";
+        }
+        if (card.getNumber().length() != 16) {
+            model.addAttribute("success", false);
+            model.addAttribute("message", "Card number must be 16 digits");
+            model.addAttribute("card", card);
+            return "user/add-card";
+        }
+        ResponseMessage response = userCardService.addUserCard(userId, card);
+        if (response.getSuccess()) {
+            return "redirect:/auth/user/card/cards";
+        }
+        model.addAttribute("success", false);
+        model.addAttribute("message", response.getMessage());
+        model.addAttribute("card", card);
+        return "user/add-card";
+    }
+
+    @Override
+    public String getAllCards(Model model, HttpSession session) {
+        Long userId = getCurrentUserId(session);
         ResponseMessage response = userCardService.getAllUserCards(userId);
         model.addAttribute("success", response.getSuccess());
         model.addAttribute("message", response.getMessage());
         model.addAttribute("cards", response.getData());
-        model.addAttribute("userId", userId);
-
-        return "/user/cards";
+        return "user/cards";
     }
 
     @Override
-    public String updateCard(Long cardId, Double balance, Model model) {
+    public String showUpdateCardForm(Long cardId, Model model) {
+        model.addAttribute("cardId", cardId);
+        return "user/update-card";
+    }
+
+    @Override
+    public String updateCard(Long cardId, Double balance, Model model, HttpSession session) {
         ResponseMessage response = userCardService.updateUserCard(cardId, balance);
         if (response.getSuccess()) {
-            return "redirect:/auth/user/card/read";
+            return "redirect:/auth/user/card/cards";
         }
-
         model.addAttribute("success", false);
         model.addAttribute("message", response.getMessage());
         model.addAttribute("cardId", cardId);
-
-        return "/user/update-card";
+        return "user/update-card";
     }
 
     @Override
-    public String deleteCard(Long cardId, Long userId, Model model) {
+    public String showDeleteCardForm(Long cardId, Model model) {
+        model.addAttribute("cardId", cardId);
+        return "user/delete-card";
+    }
+
+    @Override
+    public String deleteCard(Long cardId, Model model, HttpSession session) {
+        Long userId = getCurrentUserId(session);
         ResponseMessage response = userCardService.deleteUserCard(cardId, userId);
         if (response.getSuccess()) {
-            return "redirect:/auth/user/card/read";
+            return "redirect:/auth/user/card/cards";
         }
-
         model.addAttribute("success", false);
         model.addAttribute("message", response.getMessage());
         model.addAttribute("cardId", cardId);
-        model.addAttribute("userId", userId);
-
-        return "/user/delete-card";
+        return "user/delete-card";
     }
 }

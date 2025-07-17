@@ -1,25 +1,32 @@
 package uz.app.pc_market.controller.user;
 
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import uz.app.pc_market.entity.Card;
 
 
 public interface UserCardController {
-    @PostMapping("/add-card")
-    String addCard(@RequestParam Long userId, @RequestBody Card card,Model model);
-
     @GetMapping("/add-card")
-    String CardPage(@RequestParam Long userId, Model model);
+    String showAddCardForm(Model model);
 
+    @PostMapping("/add-card")
+    String addCard(@ModelAttribute Card card, Model model, HttpSession session);
 
     @GetMapping("/cards")
-    String getAllCards(@RequestParam Long userId, Model model);
+    String getAllCards(Model model,HttpSession session);
 
-    @PutMapping("/update-card")
-    String updateCard(@RequestParam Long cardId,@RequestParam Double balance,Model model);
+    @GetMapping("/update-card")
+    String showUpdateCardForm(@RequestParam Long cardId, Model model);
 
+    @PostMapping("/update-card")
+    String updateCard(@RequestParam Long cardId, @RequestParam Double balance, Model model, HttpSession session);
 
-    @DeleteMapping("/delete-card")
-    String deleteCard(@RequestParam Long cardId, @RequestParam Long userId,Model model);
+    @GetMapping("/delete-card")
+    String showDeleteCardForm(@RequestParam Long cardId, Model model);
+
+    @PostMapping("/delete-card")
+    String deleteCard(@RequestParam Long cardId, Model model,HttpSession session);
 }

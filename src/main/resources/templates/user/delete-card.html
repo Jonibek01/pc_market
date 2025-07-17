@@ -9,10 +9,10 @@
     <h2>Delete Card</h2>
     <div th:if="${success == false}" class="alert alert-danger" th:text="${message}"></div>
     <p>Are you sure you want to delete card with ID <span th:text="${cardId}"></span>?</p>
-    <form th:action="@{/auth/user/card/delete(cardId=${cardId})}" method="post">
+    <form th:action="@{/auth/user/card/delete-card(cardId=${cardId})}" method="post">
         <input type="hidden" name="cardId" th:value="${cardId}"/>
         <button type="submit" class="btn btn-danger">Delete</button>
-        <a th:href="@{/auth/user/card/read}" class="btn btn-secondary">Cancel</a>
+        <a th:href="@{/auth/user/card/cards}" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
 </body>

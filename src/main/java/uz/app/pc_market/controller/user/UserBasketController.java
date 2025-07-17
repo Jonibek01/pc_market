@@ -1,22 +1,24 @@
 package uz.app.pc_market.controller.user;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/auth/user/basket")
 public interface UserBasketController {
-    @PostMapping("/add")
-    ResponseEntity<?> addToBasket(@RequestParam Long productId, @RequestParam Integer quantity);
+    @GetMapping
+    String showBasketPage(Model model, HttpSession session);
 
-    @GetMapping("/read")
-    ResponseEntity<?> showMyBasket(@RequestParam Long basketId);
+    @PostMapping("/add")
+    String addToBasket(@RequestParam("productId") Long productId, @RequestParam("quantity") Integer quantity, Model model, HttpSession session);
 
     @PostMapping("/delete")
-    ResponseEntity<?> deleteFromBasket(@RequestParam Long basketId,@RequestParam Long productId);
+    String deleteFromBasket(@RequestParam("basketId") Long basketId, @RequestParam("productId") Long productId, Model model, HttpSession session);
 
     @PostMapping("/clear")
-    ResponseEntity<?> clearBasket(@RequestParam Long basketId);
+    String clearBasket(Model model, HttpSession session);
 
     @PostMapping("/buy")
-    ResponseEntity<?> buyAllProducts(@RequestParam Long basketId,@RequestParam Long cardId);
+    String buyAllProducts(@RequestParam("cardId") Long cardId, Model model, HttpSession session);
 }

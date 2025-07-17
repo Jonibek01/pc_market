@@ -1,31 +1,85 @@
 package uz.app.pc_market.controller.user.impl;
 
-import org.springframework.http.ResponseEntity;
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import uz.app.pc_market.controller.user.UserBasketController;
+import uz.app.pc_market.dto.userdto.ResponseMessage;
+import uz.app.pc_market.entity.User;
+import uz.app.pc_market.service.user.UserBasketService;
 
+
+@Controller
+@RequiredArgsConstructor
 public class UserBasketControllerImpl implements UserBasketController {
+    private final UserBasketService userBasketService;
+
     @Override
-    public ResponseEntity<?> addToBasket(Long productId, Integer quantity) {
-        return null;
+    public String showBasketPage(Model model, HttpSession session) {
+        User user = (User) session.getAttribute("currentUser");
+        if (user == null) {
+            model.addAttribute("error", "User not logged in");
+            return "sign-in";
+        }
+        ResponseMessage response = userBasketService.getUserBasket(user.getId());
+        model.addAttribute("success", response.getSuccess());
+        model.addAttribute("message", response.getMessage());
+        model.addAttribute("basket", response.getData());
+        return "basket";
     }
 
     @Override
-    public ResponseEntity<?> showMyBasket(Long basketId) {
-        return null;
+    public String addToBasket(Long productId, Integer quantity, Model model, HttpSession session) {
+        User user = (User) session.getAttribute("currentUser");
+        if (user == null) {
+            model.addAttribute("error", "User not logged in");
+            return "sign-in";
+        }
+        ResponseMessage response = userBasketService.addToBasket(productId, quantity);
+        model.addAttribute("success", response.getSuccess());
+        model.addAttribute("message", response.getMessage());
+        model.addAttribute("basket", response.getData());
+        return "basket";
     }
 
     @Override
-    public ResponseEntity<?> deleteFromBasket(Long basketId, Long productId) {
-        return null;
+    public String deleteFromBasket(Long basketId, Long productId, Model model, HttpSession session) {
+        User user = (User) session.getAttribute("currentUser");
+        if (user == null) {
+            model.addAttribute("error", "User not logged in");
+            return "sign-in";
+        }
+        ResponseMessage response = userBasketService.deleteFromBasket(basketId, productId);
+        model.addAttribute("success", response.getSuccess());
+        model.addAttribute("message", response.getMessage());
+        model.addAttribute("basket", response.getData());
+        return "basket";
     }
 
     @Override
-    public ResponseEntity<?> clearBasket(Long basketId) {
-        return null;
+    public String clearBasket(Model model, HttpSession session) {
+        User user = (User) session.getAttribute("currentUser");
+        if (user == null) {
+            model.addAttribute("error", "User not logged in");
+            return "sign-in";
+        }
+        ResponseMessage response = userBasketService.clearBasket(user.getId());
+        model.addAttribute("success", response.getSuccess());
+        model.addAttribute("message", response.getMessage());
+        return "basket";
     }
 
     @Override
-    public ResponseEntity<?> buyAllProducts(Long basketId, Long cardId) {
-        return null;
+    public String buyAllProducts(Long cardId, Model model, HttpSession session) {
+        User user = (User) session.getAttribute("currentUser");
+        if (user == null) {
+            model.addAttribute("error", "User not logged in");
+            return "sign-in";
+        }
+        ResponseMessage response = userBasketService.buyAllProducts(user.getId(), cardId);
+        model.addAttribute("success", response.getSuccess());
+        model.addAttribute("message", response.getMessage());
+        return "basket";
     }
 }
