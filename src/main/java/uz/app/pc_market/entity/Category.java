@@ -1,23 +1,21 @@
 package uz.app.pc_market.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.repository.cdi.Eager;
 
 import java.util.List;
-
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "categories")
 public class Category extends ABCEntity{
     private String name;
-    @ManyToOne
-    @JoinColumn(name = "parent_id")
-    private Category parentCategory;
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+
+    @OneToMany(mappedBy = "category")
     private List<SubCategory> subCategories;
 }
