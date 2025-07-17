@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Characteristic</title>
+</head>
+<body>
+<h1>Add New Characteristic</h1>
+
+<form th:action="@{/add-characteristic}" method="post">
+  <label for="name">Characteristic Name:</label><br>
+  <input type="text" id="name" name="name" required><br><br>
+
+  <label for="type">Type:</label><br>
+  <select id="type" name="type" required>
+    <option th:each="t : ${T(uz.app.pc_market.entity.enums.CharacteristicType).values()}"
+            th:value="${t}"
+            th:text="${t}">Type</option>
+  </select><br><br>
+
+  <button type="submit">Save</button>
+</form>
+
+
+<hr>
+
+<h2>All Characteristics</h2>
+
+<table>
+  <thead>
+  <tr>
+    <th>#</th>
+    <th>Name</th>
+    <th>Type</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr th:each="c, iterStat : ${characteristics}">
+    <td th:text="${iterStat.count}">1</td>
+    <td th:text="${c.name}">RAM</td>
+    <td th:text="${c.type}">TEXT</td>
+  </tr>
+  </tbody>
+</table>
+
+<br>
+<a href="/seller-cabinet">Back</a>
+
+</body>
+</html>

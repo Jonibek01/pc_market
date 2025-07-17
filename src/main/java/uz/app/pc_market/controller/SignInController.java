@@ -1,5 +1,6 @@
 package uz.app.pc_market.controller;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.boot.Banner;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,5 +17,5 @@ public interface SignInController {
     @PostMapping
     String signIn(@RequestParam("username") String username,
                   @RequestParam("password") String password,
-                  Model model);
+                  Model model, HttpSession session);
 }
