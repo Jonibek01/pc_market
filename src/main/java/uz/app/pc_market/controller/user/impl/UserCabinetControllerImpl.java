@@ -9,9 +9,4 @@ public class UserCabinetControllerImpl implements UserCabinetController {
     public String userCabinet() {
         return "user/user-cabinet";
     }
-
-    @Override
-    public String cardCabinet() {
-        return "user/card-cabinet";
-    }
 }

@@ -1,7 +1,6 @@
 package uz.app.pc_market.controller.user.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import uz.app.pc_market.controller.user.UserCardController;
@@ -16,13 +15,20 @@ public class UserCardControllerImpl implements UserCardController {
 
     @Override
     public String addCard(Long userId, Card card, Model model) {
-        ResponseMessage response = userCardService.addUserCard(userId, card);
+        ResponseMessage response = userCardService.addUserCard(userId, card, model);
         model.addAttribute("success", response.getSuccess());
         model.addAttribute("message", response.getMessage());
         model.addAttribute("cards", response.getData());
         model.addAttribute("userId", userId);
 
-        return "user/sub/add-card";
+        return "user/cards";
+    }
+
+    @Override
+    public String CardPage(Long userId, Model model) {
+        model.addAttribute("userId", userId);
+        model.addAttribute("card", new Card());
+        return "user/add-card";
     }
 
     @Override
@@ -33,7 +39,7 @@ public class UserCardControllerImpl implements UserCardController {
         model.addAttribute("cards", response.getData());
         model.addAttribute("userId", userId);
 
-        return "user/sub/cards";
+        return "/user/cards";
     }
 
     @Override
@@ -47,7 +53,7 @@ public class UserCardControllerImpl implements UserCardController {
         model.addAttribute("message", response.getMessage());
         model.addAttribute("cardId", cardId);
 
-        return "user/sub/update-card";
+        return "/user/update-card";
     }
 
     @Override
@@ -62,6 +68,6 @@ public class UserCardControllerImpl implements UserCardController {
         model.addAttribute("cardId", cardId);
         model.addAttribute("userId", userId);
 
-        return "user/sub/delete-card";
+        return "/user/delete-card";
     }
 }

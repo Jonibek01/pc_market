@@ -7,7 +7,4 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public interface UserCabinetController {
     @GetMapping
     String userCabinet();
-
-    @GetMapping("/card-cabinet")
-    String cardCabinet();
 }
