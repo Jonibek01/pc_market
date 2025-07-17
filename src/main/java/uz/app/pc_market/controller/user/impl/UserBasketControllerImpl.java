@@ -1,7 +1,7 @@
-package uz.app.pc_market.controller.myUser.impl;
+package uz.app.pc_market.controller.user.impl;
 
 import org.springframework.http.ResponseEntity;
-import uz.app.pc_market.controller.myUser.UserBasketController;
+import uz.app.pc_market.controller.user.UserBasketController;
 
 public class UserBasketControllerImpl implements UserBasketController {
     @Override

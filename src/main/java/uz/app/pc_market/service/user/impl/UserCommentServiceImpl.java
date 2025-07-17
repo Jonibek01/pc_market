@@ -1,10 +1,10 @@
-package uz.app.pc_market.service.impl;
+package uz.app.pc_market.service.user.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uz.app.pc_market.dto.CommentRequestDTO;
-import uz.app.pc_market.dto.ResponseMessage;
-import uz.app.pc_market.service.UserCommentService;
+import uz.app.pc_market.dto.userdto.CommentRequestDTO;
+import uz.app.pc_market.dto.userdto.ResponseMessage;
+import uz.app.pc_market.service.user.UserCommentService;
 
 @Service
 @RequiredArgsConstructor

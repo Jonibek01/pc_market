@@ -1,4 +1,4 @@
-package uz.app.pc_market.controller.myUser;
+package uz.app.pc_market.controller.user;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
@@ -8,14 +8,14 @@ import uz.app.pc_market.entity.Card;
 @RequestMapping("/auth/user/card")
 public interface UserCardController {
     @PostMapping("/add")
-    ResponseEntity<?> addCard(@RequestBody Card card);
+    String addCard(@RequestParam Long userId, @RequestBody Card card,Model model);
 
     @GetMapping("/read")
     String getAllCards(@RequestParam Long userId, Model model);
 
     @PostMapping("/update")
-    ResponseEntity<?> updateCard(@RequestParam Long cardId,@RequestParam Double balance);
+    String updateCard(@RequestParam Long cardId,@RequestParam Double balance,Model model);
 
     @PostMapping("/delete")
-    ResponseEntity<?> deleteCard(@RequestParam Long cardId, @RequestParam Long userId);
+    String deleteCard(@RequestParam Long cardId, @RequestParam Long userId,Model model);
 }

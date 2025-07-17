@@ -1,8 +1,8 @@
-package uz.app.pc_market.controller.myUser;
+package uz.app.pc_market.controller.user;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import uz.app.pc_market.dto.CommentRequestDTO;
+import uz.app.pc_market.dto.userdto.CommentRequestDTO;
 
 @RequestMapping("/auth/user/comment")
 public interface UserCommentController {

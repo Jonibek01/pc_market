@@ -1,9 +1,9 @@
-package uz.app.pc_market.service.impl;
+package uz.app.pc_market.service.user.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uz.app.pc_market.dto.ResponseMessage;
-import uz.app.pc_market.service.UserBasketService;
+import uz.app.pc_market.dto.userdto.ResponseMessage;
+import uz.app.pc_market.service.user.UserBasketService;
 
 @Service
 @RequiredArgsConstructor

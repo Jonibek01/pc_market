@@ -1,4 +1,4 @@
-package uz.app.pc_market.dto;
+package uz.app.pc_market.dto.userdto;
 
 import lombok.Builder;
 import lombok.Data;

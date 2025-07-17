@@ -1,8 +1,8 @@
-package uz.app.pc_market.controller.myUser.impl;
+package uz.app.pc_market.controller.user.impl;
 
 import org.springframework.http.ResponseEntity;
-import uz.app.pc_market.controller.myUser.UserCommentController;
-import uz.app.pc_market.dto.CommentRequestDTO;
+import uz.app.pc_market.controller.user.UserCommentController;
+import uz.app.pc_market.dto.userdto.CommentRequestDTO;
 
 public class UserCommentControllerImpl implements UserCommentController {
     @Override

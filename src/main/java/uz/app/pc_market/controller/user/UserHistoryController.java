@@ -1,4 +1,4 @@
-package uz.app.pc_market.controller.myUser;
+package uz.app.pc_market.controller.user;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
