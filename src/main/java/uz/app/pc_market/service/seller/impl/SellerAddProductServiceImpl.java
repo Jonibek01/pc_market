@@ -29,18 +29,24 @@ public class SellerAddProductServiceImpl implements SellerAddProductService {
 
     @Override
     public String showproducts(Model model) {
-        if (!model.containsAttribute("productDto")) {
-            model.addAttribute("productDto", new ProductRequestDto());
-        }
+        System.out.println("🔍 Loading Add Product page...");
+
         model.addAttribute("subCategories", subCategoryRepository.findAll());
         model.addAttribute("characteristics", characteristicsRepository.findAll());
+
         return "seller/add-product";
     }
 
+
+
     @Override
     @Transactional
-    public String saveProduct(ProductRequestDto dto, Model model) {
-        String name = dto.getName();
+    public String saveProduct(String name, String description, Double price, Integer quantity,
+                              String imageUrl, Long subCategoryId,
+                              List<Long> charIds, List<String> charValues,
+                              Model model) {
+        System.out.println("⚠ Entered saveProduct() method");
+
         if (name == null || name.trim().isEmpty()) {
             model.addAttribute("error", "Product name is required.");
             return "seller/add-product";
@@ -51,45 +57,41 @@ public class SellerAddProductServiceImpl implements SellerAddProductService {
             return "seller/add-product";
         }
 
-        if (dto.getPrice() == null || dto.getPrice() < 0) {
+        if (price == null || price < 0) {
             model.addAttribute("error", "Price must be a positive number.");
             return "seller/add-product";
         }
 
-        if (dto.getQuantity() == null || dto.getQuantity() < 0) {
+        if (quantity == null || quantity < 0) {
             model.addAttribute("error", "Quantity must be a positive number.");
             return "seller/add-product";
         }
-        if (dto.getCharIds() == null || dto.getCharValues() == null ||
-                dto.getCharIds().size() != dto.getCharValues().size()) {
+
+        if (charIds == null || charValues == null || charIds.size() != charValues.size()) {
             model.addAttribute("error", "Mismatch between characteristics and values.");
             return "seller/add-product";
         }
 
-        if (dto.getCharIds().size() != dto.getCharValues().size()) {
-            model.addAttribute("error", "Mismatch between characteristics and values.");
-            return "seller/add-product";
-        }
+        System.out.println("charIds: " + charIds);
+        System.out.println("charValues: " + charValues);
 
-        SubCategory subCategory = subCategoryRepository.findById(dto.getSubCategoryId())
+        SubCategory subCategory = subCategoryRepository.findById(subCategoryId)
                 .orElseThrow(() -> new IllegalArgumentException("Subcategory not found."));
 
         Product product = new Product();
         product.setName(name.trim());
-        product.setDescription(dto.getDescription().trim());
-        product.setPrice(dto.getPrice());
-        product.setQuantity(dto.getQuantity());
-        product.setImageUrl(dto.getImageUrl());
+        product.setDescription(description.trim());
+        product.setPrice(price);
+        product.setQuantity(quantity);
+        product.setImageUrl(imageUrl);
         product.setSubCategory(subCategory);
         product.setStatus(ProductStatus.ACTIVE);
-        logger.info("saving p : {}", product);
         product = productRepository.save(product);
-        logger.info("saved p : {}", product);
-        System.out.println("✅ product saved: " + product.getId());
+        System.out.println("✅ Product saved: " + product.getId());
 
-        for (int i = 0; i < dto.getCharIds().size(); i++) {
-            Long charId = dto.getCharIds().get(i);
-            String value = dto.getCharValues().get(i);
+        for (int i = 0; i < charIds.size(); i++) {
+            Long charId = charIds.get(i);
+            String value = charValues.get(i);
 
             Characteristics characteristic = characteristicsRepository.findById(charId)
                     .orElseThrow(() -> new IllegalArgumentException("Characteristic not found."));
@@ -126,5 +128,6 @@ public class SellerAddProductServiceImpl implements SellerAddProductService {
 
         return "redirect:/seller-cabinet";
     }
+
 
 }

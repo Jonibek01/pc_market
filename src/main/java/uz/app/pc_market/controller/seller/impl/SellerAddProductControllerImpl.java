@@ -21,7 +21,18 @@ public class SellerAddProductControllerImpl implements SellerAddProductControlle
         return sellerAddProductService.showproducts(model);
     }
 
-    public String saveProduct(ProductRequestDto dto, Model model) {
-        return sellerAddProductService.saveProduct(dto, model);
+    public String saveProduct(@RequestParam String name,
+                              @RequestParam String description,
+                              @RequestParam Double price,
+                              @RequestParam Integer quantity,
+                              @RequestParam(required = false) String imageUrl,
+                              @RequestParam Long subCategoryId,
+                              @RequestParam(name = "charIds", required = false) List<Long> charIds,
+                              @RequestParam(name = "charValues", required = false) List<String> charValues,
+                              Model model) {
+
+        return sellerAddProductService.saveProduct(
+                name, description, price, quantity, imageUrl, subCategoryId, charIds, charValues, model
+        );
     }
 }

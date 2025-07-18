@@ -1,14 +1,14 @@
 package uz.app.pc_market.controller.user.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import uz.app.pc_market.controller.user.UserCardController;
 import uz.app.pc_market.dto.userdto.ResponseMessage;
 import uz.app.pc_market.entity.Card;
 import uz.app.pc_market.service.user.UserCardService;
-
-@Service
+@Controller
 @RequiredArgsConstructor
 public class UserCardControllerImpl implements UserCardController {
     private final UserCardService userCardService;

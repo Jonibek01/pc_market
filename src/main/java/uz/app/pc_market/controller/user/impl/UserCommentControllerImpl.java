@@ -1,9 +1,10 @@
 package uz.app.pc_market.controller.user.impl;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import uz.app.pc_market.controller.user.UserCommentController;
 import uz.app.pc_market.dto.userdto.CommentRequestDTO;
-
+@Controller
 public class UserCommentControllerImpl implements UserCommentController {
     @Override
     public ResponseEntity<?> createComment(Long productId, CommentRequestDTO commentRequestDTO) {

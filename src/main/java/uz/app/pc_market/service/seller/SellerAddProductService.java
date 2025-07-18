@@ -9,5 +9,8 @@ import java.util.List;
 public interface SellerAddProductService {
 
     String showproducts(Model model);
-    String saveProduct(ProductRequestDto dto, Model model);
+    String saveProduct(String name, String description, Double price, Integer quantity,
+                       String imageUrl, Long subCategoryId,
+                       List<Long> charIds, List<String> charValues,
+                       Model model);
 }

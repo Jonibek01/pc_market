@@ -7,32 +7,38 @@
     function addCharacteristicRow() {
       const table = document.getElementById("charTableBody");
       const row = table.insertRow();
-      row.insertCell(0).innerHTML = document.getElementById("charTemplate").innerHTML;
-      row.insertCell(1).innerHTML = '<input type="text" th:field="*{charValues}" required>';
+
+      // Characteristic dropdown
+      const selectCell = row.insertCell(0);
+      selectCell.innerHTML = document.getElementById("charTemplate").innerHTML;
+
+      // Value input
+      const valueCell = row.insertCell(1);
+      valueCell.innerHTML = '<input type="text" name="charValues" required>';
     }
   </script>
 </head>
 <body>
 <h1>Add Product</h1>
 
-<form th:action="@{/add-product}" th:object="${productDto}" method="post">
+<form th:action="@{/add-product}" method="post">
   <label>Name:</label><br>
-  <input type="text" th:field="*{name}" required><br><br>
+  <input type="text" name="name" required><br><br>
 
   <label>Description:</label><br>
-  <textarea th:field="*{description}" required></textarea><br><br>
+  <textarea name="description" required></textarea><br><br>
 
   <label>Price:</label><br>
-  <input type="number" step="0.01" th:field="*{price}" required><br><br>
+  <input type="number" step="0.01" name="price" required><br><br>
 
   <label>Quantity:</label><br>
-  <input type="number" th:field="*{quantity}" required><br><br>
+  <input type="number" name="quantity" required><br><br>
 
   <label>Image URL:</label><br>
-  <input type="text" th:field="*{imageUrl}"><br><br>
+  <input type="text" name="imageUrl"><br><br>
 
   <label>Subcategory:</label><br>
-  <select th:field="*{subCategoryId}" required>
+  <select name="subCategoryId" required>
     <option th:each="sc : ${subCategories}" th:value="${sc.id}" th:text="${sc.name}">Subcategory</option>
   </select><br><br>
 
@@ -44,18 +50,16 @@
       <th>Value</th>
     </tr>
     </thead>
-    <tbody id="charTableBody">
-    <!-- Dynamic rows will be inserted here -->
-    </tbody>
+    <tbody id="charTableBody"></tbody>
   </table>
   <button type="button" onclick="addCharacteristicRow()">Add Characteristic</button>
 
   <br><br>
   <button type="submit">Save Product</button>
 
-  <!-- Characteristic Select Template -->
+  <!-- Hidden template -->
   <div id="charTemplate" style="display: none;">
-    <select th:field="*{charIds}">
+    <select name="charIds">
       <option th:each="c : ${characteristics}" th:value="${c.id}" th:text="${c.name}">Characteristic</option>
     </select>
   </div>

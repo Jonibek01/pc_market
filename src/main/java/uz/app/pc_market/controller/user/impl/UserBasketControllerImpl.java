@@ -1,8 +1,9 @@
 package uz.app.pc_market.controller.user.impl;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import uz.app.pc_market.controller.user.UserBasketController;
-
+@Controller
 public class UserBasketControllerImpl implements UserBasketController {
     @Override
     public ResponseEntity<?> addToBasket(Long productId, Integer quantity) {
