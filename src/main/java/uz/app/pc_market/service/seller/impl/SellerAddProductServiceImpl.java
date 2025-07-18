@@ -129,5 +129,22 @@ public class SellerAddProductServiceImpl implements SellerAddProductService {
         return "redirect:/seller-cabinet";
     }
 
+    @Override
+    public String getAllProducts(Model model) {
+        logger.info("🔍 Loading all products for seller...");
+
+        List<Product> products = productRepository.findAll();
+        model.addAttribute("products", products);
+
+        if (products.isEmpty()) {
+            model.addAttribute("message", "No products found in the catalog.");
+            model.addAttribute("success", false);
+        } else {
+            model.addAttribute("success", true);
+        }
+
+        return "seller/products";
+    }
+
 
 }
