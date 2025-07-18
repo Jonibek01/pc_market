@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Product</title>
+  <script>
+    function addCharacteristicRow() {
+      const table = document.getElementById("charTableBody");
+      const row = table.insertRow();
+
+      // Characteristic dropdown
+      const selectCell = row.insertCell(0);
+      selectCell.innerHTML = document.getElementById("charTemplate").innerHTML;
+
+      // Value input
+      const valueCell = row.insertCell(1);
+      valueCell.innerHTML = '<input type="text" name="charValues" required>';
+    }
+  </script>
+</head>
+<body>
+<h1>Add Product</h1>
+
+<form th:action="@{/add-product}" method="post">
+  <label>Name:</label><br>
+  <input type="text" name="name" required><br><br>
+
+  <label>Description:</label><br>
+  <textarea name="description" required></textarea><br><br>
+
+  <label>Price:</label><br>
+  <input type="number" step="0.01" name="price" required><br><br>
+
+  <label>Quantity:</label><br>
+  <input type="number" name="quantity" required><br><br>
+
+  <label>Image URL:</label><br>
+  <input type="text" name="imageUrl"><br><br>
+
+  <label>Subcategory:</label><br>
+  <select name="subCategoryId" required>
+    <option th:each="sc : ${subCategories}" th:value="${sc.id}" th:text="${sc.name}">Subcategory</option>
+  </select><br><br>
+
+  <h3>Characteristics</h3>
+  <table>
+    <thead>
+    <tr>
+      <th>Title</th>
+      <th>Value</th>
+    </tr>
+    </thead>
+    <tbody id="charTableBody"></tbody>
+  </table>
+  <button type="button" onclick="addCharacteristicRow()">Add Characteristic</button>
+
+  <br><br>
+  <button type="submit">Save Product</button>
+
+  <!-- Hidden template -->
+  <div id="charTemplate" style="display: none;">
+    <select name="charIds">
+      <option th:each="c : ${characteristics}" th:value="${c.id}" th:text="${c.name}">Characteristic</option>
+    </select>
+  </div>
+</form>
+</body>
+</html>

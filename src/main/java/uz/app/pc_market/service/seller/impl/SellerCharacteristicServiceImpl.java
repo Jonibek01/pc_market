@@ -27,4 +27,5 @@ public class SellerCharacteristicServiceImpl implements SellerCharacteristicServ
         characteristicsRepository.save(c);
         return "redirect:/add-characteristic"; // or wherever you want to go
     }
+
 }
