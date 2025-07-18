@@ -17,12 +17,12 @@ public class UserHistoryControllerImpl implements UserHistoryController {
 
     @Override
     public String showHistoryPage(Model model, HttpSession session) {
-        User user = (User) session.getAttribute("currentUser");
-        if (user == null) {
+        User userId = (User) session.getAttribute("userId");
+        if (userId == null) {
             model.addAttribute("error", "User not logged in");
             return "sign-in";
         }
-        ResponseMessage response = userHistoryService.getUserHistory(user.getId());
+        ResponseMessage response = userHistoryService.getUserHistory(userId.getId());
         model.addAttribute("success", response.getSuccess());
         model.addAttribute("message", response.getMessage());
         model.addAttribute("histories", response.getData());

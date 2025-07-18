@@ -6,11 +6,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import uz.app.pc_market.dto.userdto.CommentRequestDTO;
 
-@RequestMapping("/auth/user/comment")
+@RequestMapping("/user/comment")
 public interface UserCommentController {
-    @GetMapping
+    @GetMapping("/comments")
     String showCommentPage(@RequestParam("productId") Long productId, Model model, HttpSession session);
 
-    @PostMapping("/add")
+    @PostMapping("/add-comment")
     String addComment(@ModelAttribute CommentRequestDTO commentRequestDTO, Model model, HttpSession session);
 }

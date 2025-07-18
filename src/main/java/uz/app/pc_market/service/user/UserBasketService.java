@@ -1,9 +1,9 @@
 package uz.app.pc_market.service.user;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import uz.app.pc_market.dto.userdto.ResponseMessage;
 
-@Service
+@Component
 public interface UserBasketService {
     ResponseMessage getUserBasket(Long basketId);
 

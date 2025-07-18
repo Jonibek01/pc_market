@@ -1,39 +1,52 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>User Cards</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cards</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .card-item {
+            transition: all 0.3s ease;
+        }
+        .card-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
-<body>
-<div class="container">
-    <h2>User Cards</h2>
-    <div th:if="${success == false}" class="alert alert-danger" th:text="${message}"></div>
-    <div th:if="${success == true}">
-        <table class="table table-bordered">
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>Card Number</th>
-                <th>Balance</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="card : ${cards}">
-                <td th:text="${card.id}"></td>
-                <td th:text="${card.number}"></td>
-                <td th:text="${card.amount}"></td>
-                <td th:text="${card.cardStatus}"></td>
-                <td>
-                    <a th:href="@{/auth/user/card/update-card(cardId=${card.id})}" class="btn btn-primary btn-sm">Update</a>
-                    <a th:href="@{/auth/user/card/delete-card(cardId=${card.id})}" class="btn btn-danger btn-sm">Delete</a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-        <a th:href="@{/auth/user/card/add-card}" class="btn btn-success">Add New Card</a>
-        <a th:href="@{/auth/logout}" class="btn btn-secondary">Logout</a>
+<body class="bg-gray-100">
+<div class="container mx-auto px-4 py-8">
+    <header class="mb-8 text-center">
+        <h1 class="text-4xl font-bold text-gray-800">Your Cards</h1>
+        <p class="text-gray-600 mt-2">Manage your payment cards</p>
+    </header>
+
+    <!-- Success/Error Message -->
+    <div th:if="${message}" class="mb-6 p-4 rounded-lg" th:classappend="${success} ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+        <p th:text="${message}"></p>
+    </div>
+
+    <!-- Cards List -->
+    <div th:if="${cards != null and !cards.isEmpty()}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div th:each="card : ${cards}" class="card-item bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-semibold text-gray-800" th:text="${card.number}">Card Number</h3>
+            <p class="text-gray-600">Balance: $<span th:text="${card.amount}">0.00</span></p>
+            <p class="text-gray-600">Status: <span th:text="${card.cardStatus}">Status</span></p>
+            <div class="mt-4 flex space-x-4">
+                <a th:href="@{/user/card/update-card(cardId=${card.id})}" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Update</a>
+                <a th:href="@{/user/card/delete-card(cardId=${card.id})}" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Delete</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty Cards Message -->
+    <div th:if="${cards == null or cards.isEmpty()}" class="text-center bg-white p-6 rounded-lg shadow-md">
+        <p class="text-gray-600 text-lg">No cards found. Add a new card now!</p>
+        <a th:href="@{/user/card/add-card}" class="mt-4 inline-block bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600">Add Card</a>
     </div>
 </div>
 </body>

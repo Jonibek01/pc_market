@@ -1,8 +1,6 @@
 package uz.app.pc_market.service.user;
 
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 import uz.app.pc_market.dto.userdto.ResponseMessage;
 import uz.app.pc_market.entity.Card;
 

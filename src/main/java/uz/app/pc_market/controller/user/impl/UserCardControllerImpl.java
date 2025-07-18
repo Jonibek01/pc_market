@@ -1,17 +1,16 @@
 package uz.app.pc_market.controller.user.impl;
 
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.RequestParam;
 import uz.app.pc_market.controller.user.UserCardController;
 import uz.app.pc_market.dto.userdto.ResponseMessage;
 import uz.app.pc_market.entity.Card;
 import uz.app.pc_market.service.user.UserCardService;
 
-@Service
+@Controller
 @RequiredArgsConstructor
 public class UserCardControllerImpl implements UserCardController {
     private final UserCardService userCardService;
@@ -27,7 +26,7 @@ public class UserCardControllerImpl implements UserCardController {
     @Override
     public String showAddCardForm(Model model) {
         model.addAttribute("card", new Card());
-        return "user/add-card";
+        return "user/card/add-card";
     }
 
     @Override
@@ -77,15 +76,19 @@ public class UserCardControllerImpl implements UserCardController {
     }
 
     @Override
-    public String updateCard(Long cardId, Double balance, Model model, HttpSession session) {
+    public String updateCard(@RequestParam Long cardId, @RequestParam Double balance, Model model, HttpSession session) {
+        Long userId = getCurrentUserId(session);
+        if (userId == null) {
+            return "redirect:/auth/login";
+        }
         ResponseMessage response = userCardService.updateUserCard(cardId, balance);
         if (response.getSuccess()) {
-            return "redirect:/auth/user/card/cards";
+            return "redirect:/user/card/cards";
         }
         model.addAttribute("success", false);
         model.addAttribute("message", response.getMessage());
         model.addAttribute("cardId", cardId);
-        return "user/update-card";
+        return "user/card/update-card";
     }
 
     @Override
@@ -94,16 +97,19 @@ public class UserCardControllerImpl implements UserCardController {
         return "user/delete-card";
     }
 
-    @Override
-    public String deleteCard(Long cardId, Model model, HttpSession session) {
+    public String deleteCard(@RequestParam Long cardId, Model model, HttpSession session) {
         Long userId = getCurrentUserId(session);
+        if (userId == null) {
+            return "redirect:/auth/login";
+        }
         ResponseMessage response = userCardService.deleteUserCard(cardId, userId);
         if (response.getSuccess()) {
-            return "redirect:/auth/user/card/cards";
+            return "redirect:/user/card/cards";
         }
         model.addAttribute("success", false);
         model.addAttribute("message", response.getMessage());
         model.addAttribute("cardId", cardId);
-        return "user/delete-card";
+        return "user/card/delete-card";
     }
+
 }

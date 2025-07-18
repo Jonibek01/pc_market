@@ -5,18 +5,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("/auth/user/basket")
+@RequestMapping("/user/basket")
 public interface UserBasketController {
-    @GetMapping
+    @GetMapping("/baskets")
     String showBasketPage(Model model, HttpSession session);
 
-    @PostMapping("/add")
+    @PostMapping("/add-basket")
     String addToBasket(@RequestParam("productId") Long productId, @RequestParam("quantity") Integer quantity, Model model, HttpSession session);
 
-    @PostMapping("/delete")
+    @PostMapping("/delete-basket")
     String deleteFromBasket(@RequestParam("basketId") Long basketId, @RequestParam("productId") Long productId, Model model, HttpSession session);
 
-    @PostMapping("/clear")
+    @PostMapping("/clear-basket")
     String clearBasket(Model model, HttpSession session);
 
     @PostMapping("/buy")

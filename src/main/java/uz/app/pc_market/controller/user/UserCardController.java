@@ -7,7 +7,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import uz.app.pc_market.entity.Card;
 
-
+@RequestMapping("/user/card")
 public interface UserCardController {
     @GetMapping("/add-card")
     String showAddCardForm(Model model);

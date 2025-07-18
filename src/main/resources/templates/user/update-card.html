@@ -1,21 +1,45 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Card</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .card-form {
+            transition: all 0.3s ease;
+        }
+        .card-form:hover {
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
-<body>
-<div class="container">
-    <h2>Update Card</h2>
-    <div th:if="${success == false}" class="alert alert-danger" th:text="${message}"></div>
-    <form th:action="@{/auth/user/card/update-card(cardId=${cardId})}" method="post">
-        <input type="hidden" name="cardId" th:value="${cardId}"/>
-        <div class="form-group">
-            <label for="balance">New Balance</label>
-            <input type="number" step="0.01" class="form-control" id="balance" name="balance" required/>
-        </div>
-        <button type="submit" class="btn btn-primary">Update Balance</button>
-    </form>
+<body class="bg-gray-100">
+<div class="container mx-auto px-4 py-8">
+    <header class="mb-8 text-center">
+        <h1 class="text-4xl font-bold text-gray-800">Update Card</h1>
+        <p class="text-gray-600 mt-2">Update your card balance</p>
+    </header>
+
+    <!-- Success/Error Message -->
+    <div th:if="${message}" class="mb-6 p-4 rounded-lg" th:classappend="${success} ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+        <p th:text="${message}"></p>
+    </div>
+
+    <!-- Update Card Form -->
+    <div class="card-form bg-white p-6 rounded-lg shadow-md max-w-md mx-auto">
+        <form th:action="@{/user/card/update-card}" method="post">
+            <input type="hidden" name="cardId" th:value="${cardId}">
+            <div class="mb-4">
+                <label for="balance" class="block text-gray-700 mb-2">New Balance</label>
+                <input type="number" name="balance" id="balance" step="0.01" class="border rounded px-4 py-2 w-full" placeholder="0.00">
+            </div>
+            <button type="submit" class="bg-yellow-500 text-white px-6 py-3 rounded hover:bg-yellow-600 w-full">Update Balance</button>
+        </form>
+    </div>
 </div>
 </body>
 </html>
