@@ -3,27 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <title>All SubCategories</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            padding: 40px;
+            color: #2c3e50;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+
+        table {
+            width: 80%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 14px 18px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f0f8ff;
+        }
+
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            font-size: 16px;
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        a:hover {
+            color: #2c80b4;
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-<h1>SubCategories</h1>
 
-<table border="1">
+<h1>All SubCategories</h1>
+
+<table>
     <thead>
     <tr>
         <th>#</th>
-        <th>Name</th>
+        <th>SubCategory Name</th>
         <th>Parent Category</th>
     </tr>
     </thead>
     <tbody>
     <tr th:each="sc, iter : ${subCategories}">
         <td th:text="${iter.count}">1</td>
-        <td th:text="${sc.name}">Sub</td>
-        <td th:text="${sc.category.name}">Parent</td>
+        <td th:text="${sc.name}">SubCategory</td>
+        <td th:text="${sc.category.name}">Parent Category</td>
     </tr>
     </tbody>
 </table>
 
-<a href="/seller-cabinet">Back to Cabinet</a>
+<a href="/seller-cabinet">← Back to Seller Cabinet</a>
+
 </body>
 </html>

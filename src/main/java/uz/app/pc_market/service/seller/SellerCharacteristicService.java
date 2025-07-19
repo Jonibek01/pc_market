@@ -10,4 +10,5 @@ public interface SellerCharacteristicService {
     String showAddCharacteristicForm(Model model) ;
     String createCharacteristic(String name, CharacteristicType type, Model model);
 
+    String addDefaultValue(Long characteristicId, String value);
 }

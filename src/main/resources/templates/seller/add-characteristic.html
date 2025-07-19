@@ -2,36 +2,148 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Add Characteristic</title>
+  <title>Add Characteristic | PC Market</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f8;
+      color: #2c3e50;
+      padding: 40px;
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #34495e;
+      margin-bottom: 20px;
+    }
+
+    .form-container {
+      max-width: 700px;
+      margin: 0 auto 40px;
+      background-color: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+    }
+
+    form label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"], select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0 auto 40px;
+      background-color: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background-color: #3498db;
+      color: white;
+    }
+
+    td span {
+      margin-right: 6px;
+      background-color: #ecf0f1;
+      padding: 4px 8px;
+      border-radius: 5px;
+      font-size: 13px;
+      display: inline-block;
+    }
+
+    a.back-link {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      text-decoration: none;
+      color: #7f8c8d;
+    }
+
+    a.back-link:hover {
+      color: #2c3e50;
+    }
+  </style>
 </head>
 <body>
+
 <h1>Add New Characteristic</h1>
 
-<form th:action="@{/add-characteristic}" method="post">
-  <label for="name">Characteristic Name:</label><br>
-  <input type="text" id="name" name="name" required><br><br>
+<div class="form-container">
+  <form th:action="@{/add-characteristic}" method="post">
+    <label for="name">Characteristic Name:</label>
+    <input type="text" id="name" name="name" required>
 
-  <label for="type">Type:</label><br>
-  <select id="type" name="type" required>
-    <option th:each="t : ${T(uz.app.pc_market.entity.enums.CharacteristicType).values()}"
-            th:value="${t}"
-            th:text="${t}">Type</option>
-  </select><br><br>
+    <label for="type">Type:</label>
+    <select id="type" name="type" required>
+      <option th:each="t : ${T(uz.app.pc_market.entity.enums.CharacteristicType).values()}"
+              th:value="${t}" th:text="${t}">Type</option>
+    </select>
 
-  <button type="submit">Save</button>
-</form>
+    <button type="submit">Save Characteristic</button>
+  </form>
+</div>
 
+<h2>Add Default Characteristic Value</h2>
 
-<hr>
+<div class="form-container">
+  <form th:action="@{/add-characteristic-value}" method="post">
+    <label for="characteristicId">Select Characteristic:</label>
+    <select id="characteristicId" name="characteristicId">
+      <option th:each="c : ${characteristics}" th:value="${c.id}" th:text="${c.name}">Select</option>
+    </select>
 
-<h2>All Characteristics</h2>
+    <label for="value">Value (e.g. 16GB, Red, Acer):</label>
+    <input type="text" name="value" id="value">
+
+    <button type="submit">Save Value</button>
+  </form>
+</div>
+
+<h2>All Characteristics and Their Default Values</h2>
 
 <table>
   <thead>
   <tr>
     <th>#</th>
-    <th>Name</th>
+    <th>Characteristic Name</th>
     <th>Type</th>
+    <th>Default Values</th>
   </tr>
   </thead>
   <tbody>
@@ -39,12 +151,16 @@
     <td th:text="${iterStat.count}">1</td>
     <td th:text="${c.name}">RAM</td>
     <td th:text="${c.type}">TEXT</td>
+    <td>
+      <span th:each="val, loop : ${subCharacteristics}"
+            th:if="${val.characteristic.id == c.id}"
+            th:text="${val.value}">16GB</span>
+    </td>
   </tr>
   </tbody>
 </table>
 
-<br>
-<a href="/seller-cabinet">Back</a>
+<a href="/seller-cabinet" class="back-link">← Back to Dashboard</a>
 
 </body>
 </html>
