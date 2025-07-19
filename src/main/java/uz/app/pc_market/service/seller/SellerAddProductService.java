@@ -3,6 +3,7 @@ package uz.app.pc_market.service.seller;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 import uz.app.pc_market.dto.ProductRequestDto;
+import uz.app.pc_market.entity.Product;
 
 import java.util.List;
 @Component
@@ -15,5 +16,5 @@ public interface SellerAddProductService {
                        List<Long> charIds, List<String> charValues,
                        Model model);
 
-    String getAllProducts(Model model);
+    List<Product> getAllProducts(Model model);
 }

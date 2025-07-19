@@ -5,15 +5,15 @@ import jakarta.validation.Valid;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import uz.app.pc_market.dto.userdto.CardRequestDTO;
 import uz.app.pc_market.entity.Card;
 
 @RequestMapping("/user/card")
 public interface UserCardController {
     @GetMapping("/add-card")
     String showAddCardForm(Model model);
-
     @PostMapping("/add-card")
-    String addCard(@ModelAttribute Card card, Model model, HttpSession session);
+    String addCard(@Valid @ModelAttribute CardRequestDTO card, BindingResult bindingResult, Model model, HttpSession session);
 
     @GetMapping("/cards")
     String getAllCards(Model model,HttpSession session);
@@ -29,4 +29,5 @@ public interface UserCardController {
 
     @PostMapping("/delete-card")
     String deleteCard(@RequestParam Long cardId, Model model,HttpSession session);
+
 }

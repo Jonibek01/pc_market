@@ -9,7 +9,7 @@ import uz.app.pc_market.entity.Comment;
 import uz.app.pc_market.entity.Product;
 import uz.app.pc_market.entity.User;
 import uz.app.pc_market.repository.userrepo.CommentRepository;
-import uz.app.pc_market.repository.userrepo.ProductRepository;
+import uz.app.pc_market.repository.userrepo.UserProductRepository;
 import uz.app.pc_market.repository.userrepo.UserRepository;
 import uz.app.pc_market.service.user.UserCommentService;
 
@@ -21,7 +21,7 @@ import java.util.Optional;
 public class UserCommentServiceImpl implements UserCommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
-    private final ProductRepository productRepository;
+    private final UserProductRepository productRepository;
     private final HttpSession session;
 
     @Override

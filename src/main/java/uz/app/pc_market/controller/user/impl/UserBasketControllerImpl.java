@@ -7,11 +7,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import uz.app.pc_market.controller.user.UserBasketController;
 import uz.app.pc_market.dto.userdto.ResponseMessage;
-import uz.app.pc_market.entity.User;
 import uz.app.pc_market.service.seller.SellerAddProductService;
 import uz.app.pc_market.service.user.UserBasketService;
 import uz.app.pc_market.service.user.UserCardService;
 
+import java.util.Collections;
 
 @Controller
 @RequiredArgsConstructor
@@ -26,68 +26,93 @@ public class UserBasketControllerImpl implements UserBasketController {
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             model.addAttribute("error", "User not logged in");
+            model.addAttribute("basket", null);
+            model.addAttribute("cards", Collections.emptyList());
+            model.addAttribute("products", Collections.emptyList());
             return "sign-in";
         }
         ResponseMessage response = userBasketService.getUserBasket(userId);
         model.addAttribute("success", response.getSuccess());
         model.addAttribute("message", response.getMessage());
-        model.addAttribute("basket", response.getData());
-        model.addAttribute("cards", userCardService.getAllUserCards(userId).getData());
+        model.addAttribute("basket", response.getData() != null ? response.getData() : null);
+        model.addAttribute("cards", userCardService.getAllUserCards(userId).getData() != null ? userCardService.getAllUserCards(userId).getData() : Collections.emptyList());
         model.addAttribute("products", productService.getAllProducts(model));
         return "basket";
     }
 
     @Override
     public String addToBasket(Long productId, Integer quantity, Model model, HttpSession session) {
-        User user = (User) session.getAttribute("currentUser");
-        if (user == null) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
             model.addAttribute("error", "User not logged in");
+            model.addAttribute("basket", null);
+            model.addAttribute("cards", Collections.emptyList());
+            model.addAttribute("products", Collections.emptyList());
             return "sign-in";
         }
         ResponseMessage response = userBasketService.addToBasket(productId, quantity);
         model.addAttribute("success", response.getSuccess());
         model.addAttribute("message", response.getMessage());
-        model.addAttribute("basket", response.getData());
+        model.addAttribute("basket", response.getData() != null ? response.getData() : null);
+        model.addAttribute("cards", userCardService.getAllUserCards(userId).getData() != null ? userCardService.getAllUserCards(userId).getData() : Collections.emptyList());
+        model.addAttribute("products", productService.getAllProducts(model));
         return "basket";
     }
 
     @Override
     public String deleteFromBasket(Long basketId, Long productId, Model model, HttpSession session) {
-        User user = (User) session.getAttribute("currentUser");
-        if (user == null) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
             model.addAttribute("error", "User not logged in");
+            model.addAttribute("basket", null);
+            model.addAttribute("cards", Collections.emptyList());
+            model.addAttribute("products", Collections.emptyList());
             return "sign-in";
         }
         ResponseMessage response = userBasketService.deleteFromBasket(basketId, productId);
         model.addAttribute("success", response.getSuccess());
         model.addAttribute("message", response.getMessage());
-        model.addAttribute("basket", response.getData());
+        model.addAttribute("basket", response.getData() != null ? response.getData() : null);
+        model.addAttribute("cards", userCardService.getAllUserCards(userId).getData() != null ? userCardService.getAllUserCards(userId).getData() : Collections.emptyList());
+        model.addAttribute("products", productService.getAllProducts(model));
         return "basket";
     }
 
     @Override
     public String clearBasket(Model model, HttpSession session) {
-        User user = (User) session.getAttribute("currentUser");
-        if (user == null) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
             model.addAttribute("error", "User not logged in");
+            model.addAttribute("basket", null);
+            model.addAttribute("cards", Collections.emptyList());
+            model.addAttribute("products", Collections.emptyList());
             return "sign-in";
         }
-        ResponseMessage response = userBasketService.clearBasket(user.getId());
+        ResponseMessage response = userBasketService.clearBasket(userId);
         model.addAttribute("success", response.getSuccess());
         model.addAttribute("message", response.getMessage());
+        model.addAttribute("basket", response.getData() != null ? response.getData() : null);
+        model.addAttribute("cards", userCardService.getAllUserCards(userId).getData() != null ? userCardService.getAllUserCards(userId).getData() : Collections.emptyList());
+        model.addAttribute("products", productService.getAllProducts(model));
         return "basket";
     }
 
     @Override
     public String buyAllProducts(Long cardId, Model model, HttpSession session) {
-        User user = (User) session.getAttribute("currentUser");
-        if (user == null) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
             model.addAttribute("error", "User not logged in");
+            model.addAttribute("basket", null);
+            model.addAttribute("cards", Collections.emptyList());
+            model.addAttribute("products", Collections.emptyList());
             return "sign-in";
         }
-        ResponseMessage response = userBasketService.buyAllProducts(user.getId(), cardId);
+        ResponseMessage response = userBasketService.buyAllProducts(userId, cardId);
         model.addAttribute("success", response.getSuccess());
         model.addAttribute("message", response.getMessage());
+        model.addAttribute("basket", response.getData() != null ? response.getData() : null);
+        model.addAttribute("cards", userCardService.getAllUserCards(userId).getData() != null ? userCardService.getAllUserCards(userId).getData() : Collections.emptyList());
+        model.addAttribute("products", productService.getAllProducts(model));
         return "basket";
     }
 }

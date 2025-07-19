@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Catalog - PC Market</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .product-card { transition: all 0.3s ease; }
+        .product-card:hover { box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+<body class="bg-gray-100">
+<div class="container mx-auto px-4 py-8">
+    <header class="mb-8 text-center">
+        <h1 class="text-4xl font-bold text-gray-800">Product Catalog</h1>
+        <p class="text-gray-600 mt-2">View all products in the catalog</p>
+    </header>
+    <div th:if="${message}" class="mb-6 p-4 rounded-lg" th:classappend="${success} ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+        <p th:text="${message}"></p>
+    </div>
+    <div th:if="${products == null or products.isEmpty()}" class="text-center bg-white p-6 rounded-lg shadow-md">
+        <p class="text-gray-600 text-lg">No products found in the catalog.</p>
+        <a th:href="@{/seller/add-product}" class="mt-4 inline-block bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600">Add New Product</a>
+    </div>
+    <div th:if="${products != null and !products.isEmpty()}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div th:each="product : ${products}" class="product-card bg-white p-6 rounded-lg shadow-md">
+            <p class="text-gray-800 font-semibold" th:text="${product.name}">Product Name</p>
+            <p class="text-gray-600">Description: <span th:text="${product.description}">Description</span></p>
+            <p class="text-gray-600">Price: $<span th:text="${#numbers.formatDecimal(product.price, 1, 2)}">0.00</span></p>
+            <p class="text-gray-600">Quantity: <span th:text="${product.quantity}">0</span></p>
+            <p class="text-gray-600">Subcategory: <span th:text="${product.subCategory.name}">Subcategory</span></p>
+        </div>
+    </div>
+    <div class="mt-4 text-center">
+        <a th:href="@{/seller-cabinet}" class="text-blue-500 hover:underline">Back to Seller Cabinet</a>
+    </div>
+</div>
+</body>
+</html>

@@ -13,7 +13,7 @@ import uz.app.pc_market.entity.User;
 import uz.app.pc_market.entity.enums.BasketStatus;
 import uz.app.pc_market.repository.userrepo.BasketRepository;
 import uz.app.pc_market.repository.userrepo.BasketItemRepository;
-import uz.app.pc_market.repository.userrepo.ProductRepository;
+import uz.app.pc_market.repository.userrepo.UserProductRepository;
 import uz.app.pc_market.repository.userrepo.UserCardRepository;
 import uz.app.pc_market.repository.userrepo.UserRepository;
 import uz.app.pc_market.service.user.UserBasketService;
@@ -28,7 +28,7 @@ public class UserBasketServiceImpl implements UserBasketService {
     private final BasketRepository basketRepository;
     private final BasketItemRepository basketItemRepository;
     private final UserRepository userRepository;
-    private final ProductRepository productRepository;
+    private final UserProductRepository productRepository;
     private final UserCardRepository userCardRepository;
     private final UserHistoryService userHistoryService;
     private final HttpSession session;

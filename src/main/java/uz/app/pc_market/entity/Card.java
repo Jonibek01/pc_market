@@ -19,6 +19,10 @@ public class Card extends ABCEntity {
 
     @Enumerated(EnumType.STRING)
     private PaymentStatus cardStatus;
+//
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "card_status", nullable = false)
+//    private MyCardStatus status;
 
     @ManyToOne
     private User cardHolder;

@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
-import uz.app.pc_market.dto.ProductRequestDto;
 import uz.app.pc_market.entity.Characteristics;
 import uz.app.pc_market.entity.Product;
 import uz.app.pc_market.entity.ProductCharacteristic;
@@ -128,22 +127,18 @@ public class SellerAddProductServiceImpl implements SellerAddProductService {
 
         return "redirect:/seller-cabinet";
     }
-
     @Override
-    public String getAllProducts(Model model) {
+    public List<Product> getAllProducts(Model model) {
         logger.info("🔍 Loading all products for seller...");
-
         List<Product> products = productRepository.findAll();
         model.addAttribute("products", products);
-
         if (products.isEmpty()) {
             model.addAttribute("message", "No products found in the catalog.");
             model.addAttribute("success", false);
         } else {
             model.addAttribute("success", true);
         }
-
-        return "seller/products";
+        return products;
     }
 
 

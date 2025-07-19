@@ -36,6 +36,7 @@ public class SignInControllerImpl implements SignInController {
 
         User user = userByEmailAndPassword.get();
         session.setAttribute("currentUser", user);
+        session.setAttribute("userId", user.getId());
         if (user.getEmail().equals(email) && user.getPassword().equals(password)) {
             if (user.getRole().equals(Role.SELLER)) {
                 return "redirect:/seller-cabinet";
@@ -48,5 +49,9 @@ public class SignInControllerImpl implements SignInController {
             model.addAttribute("error", "Login yoki parol xato!");
             return "sign-in";
         }
+    }
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/sign-in";
     }
 }
