@@ -19,7 +19,13 @@ public class UserCabinetControllerImpl implements UserCabinetController {
             model.addAttribute("error", "User not logged in");
             return "sign-in";
         }
-        userRepository.findById(userId).ifPresent(user -> model.addAttribute("user", user));
-        return "user-cabinet";
+        userRepository.findById(userId).ifPresentOrElse(
+                user -> {
+                    model.addAttribute("user", user);
+                    model.addAttribute("balance", user.getBalance());
+                },
+                () -> model.addAttribute("error", "User not found")
+        );
+        return "user/user-cabinet";
     }
 }

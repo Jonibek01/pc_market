@@ -3,8 +3,8 @@ package uz.app.pc_market.service.user.impl;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 import uz.app.pc_market.dto.userdto.CommentRequestDTO;
-import uz.app.pc_market.dto.userdto.ResponseMessage;
 import uz.app.pc_market.entity.Comment;
 import uz.app.pc_market.entity.Product;
 import uz.app.pc_market.entity.User;
@@ -25,86 +25,69 @@ public class UserCommentServiceImpl implements UserCommentService {
     private final HttpSession session;
 
     @Override
-    public ResponseMessage addUserComment(Long userId, CommentRequestDTO commentRequestDTO) {
+    public String addUserComment(Long userId, CommentRequestDTO commentRequestDTO, Model model) {
+        Long currentUserId = getCurrentUserId();
+        if (currentUserId == null) {
+            model.addAttribute("error", "Please log in to add a comment");
+            return "sign-in";
+        }
+        if (!userId.equals(currentUserId)) {
+            model.addAttribute("error", "You cannot add a comment for another user");
+            return "error";
+        }
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isEmpty()) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("User not found")
-                    .data(null)
-                    .build();
-        }
-        if (!userOptional.get().getId().equals(getCurrentUserId())) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("You cannot add a comment for another user")
-                    .data(null)
-                    .build();
+            model.addAttribute("error", "User not found");
+            return "error";
         }
         Optional<Product> productOptional = productRepository.findById(commentRequestDTO.getProductId());
         if (productOptional.isEmpty()) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("Product not found")
-                    .data(null)
-                    .build();
+            model.addAttribute("error", "Product not found");
+            return "error";
         }
         if (commentRequestDTO.getDescription() == null || commentRequestDTO.getDescription().isEmpty()) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("Comment description is required")
-                    .data(null)
-                    .build();
+            model.addAttribute("error", "Comment description is required");
+            model.addAttribute("commentDto", commentRequestDTO);
+            model.addAttribute("products", productRepository.findAll());
+            return "user/comments/add-comment";
         }
         if (commentRequestDTO.getRating() == null || commentRequestDTO.getRating() < 0 || commentRequestDTO.getRating() > 5) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("Rating must be between 0 and 5")
-                    .data(null)
-                    .build();
+            model.addAttribute("error", "Rating must be between 0 and 5");
+            model.addAttribute("commentDto", commentRequestDTO);
+            model.addAttribute("products", productRepository.findAll());
+            return "user/comments/add-comment";
         }
         Comment comment = new Comment();
         comment.setDescription(commentRequestDTO.getDescription());
         comment.setRating(commentRequestDTO.getRating());
         comment.setUser(userOptional.get());
         comment.setProduct(productOptional.get());
-        Comment savedComment = commentRepository.save(comment);
-        return ResponseMessage.builder()
-                .success(true)
-                .message("Comment added successfully")
-                .data(savedComment)
-                .build();
+        commentRepository.save(comment);
+        model.addAttribute("success", "Comment added successfully");
+        return "redirect:/user/comments/add-comment";
     }
 
     @Override
-    public ResponseMessage getAllComments(Long productId) {
+    public String getAllComments(Long productId, Model model) {
         Optional<Product> productOptional = productRepository.findById(productId);
         if (productOptional.isEmpty()) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("Product not found")
-                    .data(null)
-                    .build();
+            model.addAttribute("error", "Product not found");
+            return "error";
         }
         List<Comment> comments = commentRepository.findByProductId(productId);
         if (comments.isEmpty()) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("No comments found for this product")
-                    .data(null)
-                    .build();
+            model.addAttribute("error", "No comments found for this product");
+        } else {
+            model.addAttribute("comments", comments);
+            model.addAttribute("product", productOptional.get());
         }
-        return ResponseMessage.builder()
-                .success(true)
-                .message("Comments retrieved successfully")
-                .data(comments)
-                .build();
+        return "user/comments/comments";
     }
 
     private Long getCurrentUserId() {
         Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
-            throw new IllegalStateException("User not logged in");
+            return null;
         }
         return userId;
     }

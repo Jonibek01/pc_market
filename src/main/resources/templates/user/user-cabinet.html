@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Cabinet</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-sans">
+<div class="container mx-auto p-6">
+  <h2 class="text-2xl font-semibold text-gray-800 mb-4">User Cabinet</h2>
+  <!-- Error Message bids-->
+  <div th:if="${error}" class="mb-6 p-4 rounded-lg bg-red-100 text-red-700">
+    <p th:text="${error}"></p>
+  </div>
+  <!-- User Information -->
+  <div th:if="${user != null}" class="bg-white p-6 rounded-lg shadow-md mb-4">
+    <h3 class="text-xl font-semibold text-gray-800 mb-2">Welcome, <span th:text="${user.name}">User Name</span>!</h3>
+    <p class="text-gray-600">Email: <span th:text="${user.email}">user@example.com</span></p>
+    <p class="text-gray-600">Balance: $<span th:text="${#numbers.formatDecimal(balance, 1, 2)}">0.00</span></p>
+  </div>
+  <!-- Navigation Links -->
+  <div class="bg-white p-6 rounded-lg shadow-md">
+    <h3 class="text-xl font-semibold text-gray-800 mb-4">Manage Your Account</h3>
+    <ul class="space-y-2">
+      <li>
+        <a th:href="@{/user/basket/baskets(userId=${session.userId})}" class="text-blue-500 hover:underline">View Shopping Basket</a>
+      </li>
+      <li>
+        <a th:href="@{/user/comments/add-comment}" class="text-blue-500 hover:underline">Add Comment</a>
+      </li>
+      <li>
+        <a th:href="@{/user/comments/comments(productId=1)}" class="text-blue-500 hover:underline">View Product Comments</a>
+      </li>
+      <li>
+        <a th:href="@{/user/history/histories(userId=${session.userId})}" class="text-blue-500 hover:underline">View Purchase History</a>
+      </li>
+      <li>
+        <a th:href="@{/sign-out}" class="text-red-500 hover:underline">Sign Out</a>
+      </li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

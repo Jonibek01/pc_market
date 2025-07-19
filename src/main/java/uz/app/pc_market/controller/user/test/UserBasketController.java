@@ -1,14 +1,13 @@
-package uz.app.pc_market.controller.user;
+package uz.app.pc_market.controller.user.test;
 
 import jakarta.servlet.http.HttpSession;
-import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/user/basket")
 public interface UserBasketController {
     @GetMapping("/baskets")
-    String showBasketPage(Model model, HttpSession session);
+    String viewBasket(Model model, HttpSession session);
 
     @PostMapping("/add-basket")
     String addToBasket(@RequestParam("productId") Long productId, @RequestParam("quantity") Integer quantity, Model model, HttpSession session);
@@ -20,5 +19,5 @@ public interface UserBasketController {
     String clearBasket(Model model, HttpSession session);
 
     @PostMapping("/buy")
-    String buyAllProducts(@RequestParam("cardId") Long cardId, Model model, HttpSession session);
+    String buyAllProducts(@RequestParam Double balance, Model model, HttpSession session);
 }

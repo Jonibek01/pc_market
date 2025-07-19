@@ -2,11 +2,12 @@ package uz.app.pc_market.service.user.impl;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uz.app.pc_market.dto.userdto.ResponseMessage;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 import uz.app.pc_market.entity.Basket;
 import uz.app.pc_market.entity.BasketItem;
-import uz.app.pc_market.entity.Card;
 import uz.app.pc_market.entity.History;
 import uz.app.pc_market.entity.Product;
 import uz.app.pc_market.entity.User;
@@ -14,7 +15,6 @@ import uz.app.pc_market.entity.enums.BasketStatus;
 import uz.app.pc_market.repository.userrepo.BasketRepository;
 import uz.app.pc_market.repository.userrepo.BasketItemRepository;
 import uz.app.pc_market.repository.userrepo.UserProductRepository;
-import uz.app.pc_market.repository.userrepo.UserCardRepository;
 import uz.app.pc_market.repository.userrepo.UserRepository;
 import uz.app.pc_market.service.user.UserBasketService;
 import uz.app.pc_market.service.user.UserHistoryService;
@@ -22,6 +22,7 @@ import uz.app.pc_market.service.user.UserHistoryService;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserBasketServiceImpl implements UserBasketService {
@@ -29,68 +30,59 @@ public class UserBasketServiceImpl implements UserBasketService {
     private final BasketItemRepository basketItemRepository;
     private final UserRepository userRepository;
     private final UserProductRepository productRepository;
-    private final UserCardRepository userCardRepository;
     private final UserHistoryService userHistoryService;
     private final HttpSession session;
 
     @Override
-    public ResponseMessage getUserBasket(Long userId) {
-        Optional<User> userOptional = userRepository.findById(userId);
-        if (userOptional.isEmpty()) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("User not found")
-                    .data(null)
-                    .build();
+    public String getUserBasket(Long userId, Model model) {
+        Long currentUserId = getCurrentUserId();
+        if (currentUserId == null) {
+            log.error("User not logged in");
+            model.addAttribute("error", "Please log in to view your basket");
+            return "sign-in";
         }
-        if (!userOptional.get().getId().equals(getCurrentUserId())) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("You cannot view another user's basket")
-                    .data(null)
-                    .build();
+        if (!userId.equals(currentUserId)) {
+            log.error("User {} cannot access basket of user {}", currentUserId, userId);
+            model.addAttribute("error", "You cannot access this basket");
+            return "error";
         }
         Optional<Basket> basketOptional = basketRepository.findByUserIdAndBasketStatus(userId, BasketStatus.ACTIVE);
         if (basketOptional.isEmpty()) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("No active basket found")
-                    .data(null)
-                    .build();
+            log.info("No active basket found for user with ID: {}", userId);
+            model.addAttribute("baskets", null);
+        } else {
+            model.addAttribute("baskets", basketOptional.get().getItems());
+            log.info("Basket retrieved successfully for user with ID: {}", userId);
         }
-        return ResponseMessage.builder()
-                .success(true)
-                .message("Basket retrieved successfully")
-                .data(basketOptional.get())
-                .build();
+        return "user/basket/baskets";
     }
 
     @Override
-    public ResponseMessage addToBasket(Long productId, Integer quantity) {
-        Optional<User> userOptional = userRepository.findById(getCurrentUserId());
+    public String addToBasket(Long productId, Integer quantity, Model model) {
+        Long currentUserId = getCurrentUserId();
+        if (currentUserId == null) {
+            log.error("User not logged in");
+            model.addAttribute("error", "Please log in to add items to basket");
+            return "sign-in";
+        }
+        Optional<User> userOptional = userRepository.findById(currentUserId);
         if (userOptional.isEmpty()) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("User not found")
-                    .data(null)
-                    .build();
+            log.error("User not found: {}", currentUserId);
+            model.addAttribute("error", "User not found");
+            return "error";
         }
         Optional<Product> productOptional = productRepository.findById(productId);
         if (productOptional.isEmpty()) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("Product not found")
-                    .data(null)
-                    .build();
+            log.error("Product not found: {}", productId);
+            model.addAttribute("error", "Product not found");
+            return "error";
         }
         if (quantity == null || quantity <= 0) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("Invalid quantity")
-                    .data(null)
-                    .build();
+            log.error("Invalid quantity: {}", quantity);
+            model.addAttribute("error", "Invalid quantity");
+            return "error";
         }
-        Optional<Basket> basketOptional = basketRepository.findByUserIdAndBasketStatus(getCurrentUserId(), BasketStatus.ACTIVE);
+        Optional<Basket> basketOptional = basketRepository.findByUserIdAndBasketStatus(currentUserId, BasketStatus.ACTIVE);
         Basket basket;
         if (basketOptional.isEmpty()) {
             basket = new Basket();
@@ -122,84 +114,72 @@ public class UserBasketServiceImpl implements UserBasketService {
             basketItemRepository.save(item);
         }
 
-        basket.setTotalPrice(basket.getItems().stream().mapToDouble(BasketItem::getTotalPrice).sum());
+        basket.setTotalPrice(basket.getItems().stream().mapToDouble(BasketItem::getUnitPrice).sum());
         basket.setTotalAmount(basket.getItems().stream().mapToInt(BasketItem::getQuantity).sum());
         basketRepository.save(basket);
 
-        return ResponseMessage.builder()
-                .success(true)
-                .message("Product added to basket")
-                .data(basket)
-                .build();
+        log.info("Product with ID: {} added to basket for user with ID: {}", productId, currentUserId);
+        return "redirect:/user/basket/baskets";
     }
 
     @Override
-    public ResponseMessage deleteFromBasket(Long basketId, Long productId) {
+    public String deleteFromBasket(Long basketId, Long productId, Model model) {
+        Long currentUserId = getCurrentUserId();
+        if (currentUserId == null) {
+            log.error("User not logged in");
+            model.addAttribute("error", "Please log in to modify basket");
+            return "sign-in";
+        }
         Optional<Basket> basketOptional = basketRepository.findById(basketId);
         if (basketOptional.isEmpty()) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("Basket not found")
-                    .data(null)
-                    .build();
+            log.error("Basket not found: {}", basketId);
+            model.addAttribute("error", "Basket not found");
+            return "error";
         }
         Basket basket = basketOptional.get();
-        if (!basket.getUser().getId().equals(getCurrentUserId())) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("You cannot delete from this basket")
-                    .data(null)
-                    .build();
+        if (!basket.getUser().getId().equals(currentUserId)) {
+            log.error("User {} cannot delete from basket {}", currentUserId, basketId);
+            model.addAttribute("error", "You cannot delete from this basket");
+            return "error";
         }
         Optional<BasketItem> itemOptional = basket.getItems().stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
                 .findFirst();
         if (itemOptional.isEmpty()) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("Product not found in basket")
-                    .data(null)
-                    .build();
+            log.info("No item found for product with ID: {}", productId);
+            model.addAttribute("error", "Product not found in basket");
+            return "error";
         }
         BasketItem item = itemOptional.get();
         basket.getItems().remove(item);
         basketItemRepository.delete(item);
 
-        basket.setTotalPrice(basket.getItems().stream().mapToDouble(BasketItem::getTotalPrice).sum());
+        basket.setTotalPrice(basket.getItems().stream().mapToDouble(BasketItem::getUnitPrice).sum());
         basket.setTotalAmount(basket.getItems().stream().mapToInt(BasketItem::getQuantity).sum());
         basketRepository.save(basket);
 
-        return ResponseMessage.builder()
-                .success(true)
-                .message("Product removed from basket")
-                .data(basket)
-                .build();
+        log.info("Product with ID: {} deleted from basket with ID: {}", productId, basketId);
+        return "redirect:/user/basket/baskets";
     }
 
     @Override
-    public ResponseMessage clearBasket(Long userId) {
-        Optional<User> userOptional = userRepository.findById(userId);
-        if (userOptional.isEmpty()) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("User not found")
-                    .data(null)
-                    .build();
+    public String clearBasket(Long userId, Model model) {
+        Long currentUserId = getCurrentUserId();
+        if (currentUserId == null) {
+            log.error("User not logged in");
+            model.addAttribute("error", "Please log in to clear basket");
+            return "sign-in";
         }
-        if (!userOptional.get().getId().equals(getCurrentUserId())) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("You cannot clear this basket")
-                    .data(null)
-                    .build();
+        if (!userId.equals(currentUserId)) {
+            log.error("User {} cannot clear basket of user {}", currentUserId, userId);
+            model.addAttribute("error", "You cannot clear this basket");
+            return "error";
         }
         Optional<Basket> basketOptional = basketRepository.findByUserIdAndBasketStatus(userId, BasketStatus.ACTIVE);
         if (basketOptional.isEmpty()) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("No active basket found")
-                    .data(null)
-                    .build();
+            log.info("No active basket found for user with ID: {}", userId);
+            model.addAttribute("error", "No active basket found");
+            return "error";
         }
         Basket basket = basketOptional.get();
         basketItemRepository.deleteAll(basket.getItems());
@@ -208,82 +188,54 @@ public class UserBasketServiceImpl implements UserBasketService {
         basket.setTotalAmount(0);
         basketRepository.save(basket);
 
-        return ResponseMessage.builder()
-                .success(true)
-                .message("Basket cleared successfully")
-                .data(null)
-                .build();
+        log.info("Basket cleared successfully for user with ID: {}", userId);
+        return "redirect:/user/basket/baskets";
     }
-
     @Override
-    public ResponseMessage buyAllProducts(Long userId, Long cardId) {
+    @Transactional
+    public String buyAllProducts(Long userId, Double balance, Model model) {
+        Long currentUserId = getCurrentUserId();
+        if (currentUserId == null) {
+            model.addAttribute("error", "Please log in to buy products");
+            return "sign-in";
+        }
+        if (!userId.equals(currentUserId)) {
+            model.addAttribute("error", "You cannot buy products from this basket");
+            return "error";
+        }
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isEmpty()) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("User not found")
-                    .data(null)
-                    .build();
+            model.addAttribute("error", "User not found");
+            return "error";
         }
-        if (!userOptional.get().getId().equals(getCurrentUserId())) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("You cannot buy from this basket")
-                    .data(null)
-                    .build();
-        }
-        Optional<Card> cardOptional = userCardRepository.findById(cardId);
-        if (cardOptional.isEmpty()) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("Card not found")
-                    .data(null)
-                    .build();
-        }
-        Card card = cardOptional.get();
-        if (!card.getCardHolder().getId().equals(userId)) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("This card does not belong to you")
-                    .data(null)
-                    .build();
-        }
+        User currentUser = userOptional.get();
         Optional<Basket> basketOptional = basketRepository.findByUserIdAndBasketStatus(userId, BasketStatus.ACTIVE);
         if (basketOptional.isEmpty()) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("No active basket found")
-                    .data(null)
-                    .build();
+            model.addAttribute("error", "No active basket found");
+            return "error";
         }
         Basket basket = basketOptional.get();
         if (basket.getItems().isEmpty()) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("Basket is empty")
-                    .data(null)
-                    .build();
+            model.addAttribute("error", "Basket is empty");
+            return "error";
         }
         double totalPrice = basket.getTotalPrice();
-        if (card.getAmount() < totalPrice) {
-            return ResponseMessage.builder()
-                    .success(false)
-                    .message("Insufficient card balance")
-                    .data(null)
-                    .build();
+        if (currentUser.getBalance() < totalPrice) {
+            model.addAttribute("error", "Insufficient balance");
+            return "error";
         }
-        card.setAmount(card.getAmount() - totalPrice);
-        userCardRepository.save(card);
+        currentUser.setBalance(currentUser.getBalance() - totalPrice);
+        userRepository.save(currentUser);
 
         for (BasketItem item : basket.getItems()) {
             History history = new History();
-            history.setUser(userOptional.get());
+            history.setUser(currentUser);
             history.setProduct(item.getProduct());
             history.setStatus(BasketStatus.CONFIRMED);
             history.setOrderedTime(LocalDateTime.now());
             history.setQuantity(item.getQuantity());
-            history.setTotalPrice(item.getTotalPrice());
-            userHistoryService.saveHistory(history);
+            history.setTotalPrice(item.getUnitPrice());
+            userHistoryService.saveHistory(history, model);
         }
 
         basketItemRepository.deleteAll(basket.getItems());
@@ -293,18 +245,11 @@ public class UserBasketServiceImpl implements UserBasketService {
         basket.setBasketStatus(BasketStatus.CONFIRMED);
         basketRepository.save(basket);
 
-        return ResponseMessage.builder()
-                .success(true)
-                .message("All products purchased successfully")
-                .data(null)
-                .build();
+        model.addAttribute("success", "All products bought successfully");
+        return "redirect:/user/basket/baskets";
     }
 
     private Long getCurrentUserId() {
-        User user = (User) session.getAttribute("currentUser");
-        if (user == null) {
-            throw new IllegalStateException("User not logged in");
-        }
-        return user.getId();
+        return (Long) session.getAttribute("userId");
     }
 }

@@ -1,4 +1,4 @@
-package uz.app.pc_market.controller.user;
+package uz.app.pc_market.controller.user.test;
 
 import jakarta.servlet.http.HttpSession;
 

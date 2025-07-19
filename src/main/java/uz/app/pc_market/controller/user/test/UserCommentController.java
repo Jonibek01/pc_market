@@ -1,7 +1,6 @@
-package uz.app.pc_market.controller.user;
+package uz.app.pc_market.controller.user.test;
 
 import jakarta.servlet.http.HttpSession;
-import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import uz.app.pc_market.dto.userdto.CommentRequestDTO;
