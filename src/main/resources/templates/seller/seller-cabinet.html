@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Seller Cabinet</title>
+    <title>Seller Cabinet | PC Market</title>
     <style>
         * {
             margin: 0;
@@ -12,56 +12,112 @@
         }
 
         body {
+            display: flex;
+            height: 100vh;
             background-color: #f4f6f8;
             color: #2c3e50;
-            padding: 40px;
         }
 
-        h1 {
-            margin-bottom: 30px;
-            font-size: 32px;
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h2 {
+            color: #ecf0f1;
+            margin-bottom: 25px;
             text-align: center;
+            font-size: 22px;
         }
 
-        .nav-links {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .nav-links a {
-            display: block;
-            text-align: center;
-            padding: 15px;
+        .nav-link {
             background-color: #3498db;
             color: white;
             text-decoration: none;
-            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
             font-weight: 500;
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
-        .nav-links a:hover {
-            background-color: #2c80b4;
-            transform: translateY(-2px);
+        .nav-link:hover {
+            background-color: #2980b9;
+            transform: translateX(4px);
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .main-content h1 {
+            font-size: 36px;
+            margin-bottom: 30px;
+        }
+
+        .main-content img {
+            max-width: 600px;
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                padding: 20px 10px;
+            }
+
+            .nav-link {
+                width: 45%;
+                margin: 5px;
+                text-align: center;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-<h1>Seller Cabinet</h1>
 
-<div class="nav-links">
-    <a href="/add-category">Add Categories</a>
-    <a href="/show-categories">Show Categories</a>
-    <a href="/add-subcategory">Add SubCategories</a>
-    <a href="/show-subcategories">Show SubCategories</a>
-    <a href="/add-characteristic">Add Characteristic</a>
-    <a href="/add-product">Add Product + Characteristics</a>
-    <a href="/show-products">Show Products</a>
-    <a href="/orders">Manage Orders</a>
-    <a href="/history">History</a>
+<div class="sidebar">
+    <h2>Seller Cabinet</h2>
+    <a href="/add-category" class="nav-link">Add Categories</a>
+    <a href="/show-categories" class="nav-link">Show Categories</a>
+    <a href="/add-subcategory" class="nav-link">Add SubCategories</a>
+    <a href="/show-subcategories" class="nav-link">Show SubCategories</a>
+    <a href="/add-characteristic" class="nav-link">Add Characteristic</a>
+    <a href="/add-product" class="nav-link">Add Product</a>
+    <a href="/show-products" class="nav-link">Show Products</a>
+    <a href="/orders" class="nav-link">Manage Orders</a>
+    <a href="/history" class="nav-link">History</a>
 </div>
+
+<div class="main-content">
+    <h1>Welcome to PC Market Seller Panel</h1>
+    <img src="https://images.stockcake.com/public/e/d/b/edb567b6-7210-4b39-83bb-a23301c22222_large/electronics-store-interior-stockcake.jpg"
+         alt="PC Seller Dashboard"
+         style="width: 400px; height: 300px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+
+</div>
+
 </body>
 </html>

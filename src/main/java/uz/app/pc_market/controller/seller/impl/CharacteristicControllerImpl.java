@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import uz.app.pc_market.controller.seller.SellerCharacteristicController;
+import uz.app.pc_market.entity.CharacteristicValue;
+import uz.app.pc_market.entity.Characteristics;
 import uz.app.pc_market.entity.enums.CharacteristicType;
 import uz.app.pc_market.service.seller.SellerCharacteristicService;
 
@@ -18,6 +20,10 @@ public class CharacteristicControllerImpl implements SellerCharacteristicControl
     @Override
     public String createCharacteristic(String name, CharacteristicType type, Model model) {
         return sellerCharacteristicService.createCharacteristic(name, type, model);
+    }
+    public String addDefaultValue(Long characteristicId,
+                                  String value) {
+        return sellerCharacteristicService.addDefaultValue(characteristicId, value);
     }
 
 }

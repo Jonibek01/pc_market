@@ -2,67 +2,137 @@
 <html xmlns:th="https://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Add Product</title>
-  <script>
-    function addCharacteristicRow() {
-      const table = document.getElementById("charTableBody");
-      const row = table.insertRow();
-
-      // Characteristic dropdown
-      const selectCell = row.insertCell(0);
-      selectCell.innerHTML = document.getElementById("charTemplate").innerHTML;
-
-      // Value input
-      const valueCell = row.insertCell(1);
-      valueCell.innerHTML = '<input type="text" name="charValues" required>';
+  <title>Add Product | PC Market</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f8;
+      padding: 40px;
+      color: #2c3e50;
     }
-  </script>
+
+    .form-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 28px;
+      color: #34495e;
+    }
+
+    h3 {
+      margin-top: 30px;
+      margin-bottom: 10px;
+      color: #2c3e50;
+      font-size: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin: 12px 0 6px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+      margin-bottom: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    a {
+      display: block;
+      text-align: center;
+      margin-top: 25px;
+      color: #7f8c8d;
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: #2c3e50;
+    }
+
+    .characteristic-block {
+      margin-bottom: 16px;
+    }
+
+    .characteristic-block label {
+      margin-bottom: 4px;
+    }
+  </style>
 </head>
 <body>
-<h1>Add Product</h1>
 
-<form th:action="@{/add-product}" method="post">
-  <label>Name:</label><br>
-  <input type="text" name="name" required><br><br>
+<div class="form-container">
+  <h1>Add Product</h1>
 
-  <label>Description:</label><br>
-  <textarea name="description" required></textarea><br><br>
+  <form th:action="@{/add-product}" method="post">
 
-  <label>Price:</label><br>
-  <input type="number" step="0.01" name="price" required><br><br>
+    <label>Name:</label>
+    <input type="text" name="name" required>
 
-  <label>Quantity:</label><br>
-  <input type="number" name="quantity" required><br><br>
+    <label>Description:</label>
+    <input type="text" name="description" required>
 
-  <label>Image URL:</label><br>
-  <input type="text" name="imageUrl"><br><br>
+    <label>Price:</label>
+    <input type="number" name="price" step="0.01" required>
 
-  <label>Subcategory:</label><br>
-  <select name="subCategoryId" required>
-    <option th:each="sc : ${subCategories}" th:value="${sc.id}" th:text="${sc.name}">Subcategory</option>
-  </select><br><br>
+    <label>Quantity:</label>
+    <input type="number" name="quantity" required>
 
-  <h3>Characteristics</h3>
-  <table>
-    <thead>
-    <tr>
-      <th>Title</th>
-      <th>Value</th>
-    </tr>
-    </thead>
-    <tbody id="charTableBody"></tbody>
-  </table>
-  <button type="button" onclick="addCharacteristicRow()">Add Characteristic</button>
+    <label>Image URL:</label>
+    <input type="text" name="imageUrl">
 
-  <br><br>
-  <button type="submit">Save Product</button>
-
-  <!-- Hidden template -->
-  <div id="charTemplate" style="display: none;">
-    <select name="charIds">
-      <option th:each="c : ${characteristics}" th:value="${c.id}" th:text="${c.name}">Characteristic</option>
+    <label>SubCategory:</label>
+    <select name="subCategoryId" required>
+      <option value="" disabled selected>Choose a subcategory</option>
+      <option th:each="s : ${subCategories}" th:value="${s.id}" th:text="${s.name}">SubCategory</option>
     </select>
-  </div>
-</form>
+
+    <h3>Characteristics</h3>
+
+    <div class="characteristic-block" th:each="c : ${characteristics}">
+      <label th:text="${c.name}">RAM</label>
+      <select th:name="${'characteristics[' + c.id + ']'}">
+        <option value="" disabled selected>Choose value</option>
+        <option th:each="v : ${c.values}" th:value="${v.value}" th:text="${v.value}">Value</option>
+      </select>
+    </div>
+
+    <button type="submit">Save Product</button>
+  </form>
+
+  <a href="/seller-cabinet">← Back to Dashboard</a>
+</div>
+
 </body>
 </html>

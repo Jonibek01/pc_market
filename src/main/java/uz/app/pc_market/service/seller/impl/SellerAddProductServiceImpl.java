@@ -1,133 +1,71 @@
 package uz.app.pc_market.service.seller.impl;
-
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
-import uz.app.pc_market.dto.ProductRequestDto;
+import uz.app.pc_market.dto.ProductCreateDto;
 import uz.app.pc_market.entity.Characteristics;
 import uz.app.pc_market.entity.Product;
 import uz.app.pc_market.entity.ProductCharacteristic;
-import uz.app.pc_market.entity.SubCategory;
 import uz.app.pc_market.entity.enums.ProductStatus;
 import uz.app.pc_market.repository.CharacteristicsRepository;
 import uz.app.pc_market.repository.ProductCharacteristicRepository;
 import uz.app.pc_market.repository.ProductRepository;
 import uz.app.pc_market.repository.SubCategoryRepository;
 import uz.app.pc_market.service.seller.SellerAddProductService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class SellerAddProductServiceImpl implements SellerAddProductService {
-    private final ProductRepository productRepository;
-    private final CharacteristicsRepository characteristicsRepository;
-    private final SubCategoryRepository subCategoryRepository;
+
+
     private final ProductCharacteristicRepository productCharacteristicRepository;
-    private static final Logger logger = LoggerFactory.getLogger(SellerAddProductServiceImpl.class);
-
+    private final SubCategoryRepository subCategoryRepository;
+    private final CharacteristicsRepository characteristicsRepository;
+    private final ProductRepository productRepository;
     @Override
-    public String showproducts(Model model) {
-        System.out.println("🔍 Loading Add Product page...");
-
+    public String showAddProductForm(Model model) {
         model.addAttribute("subCategories", subCategoryRepository.findAll());
-        model.addAttribute("characteristics", characteristicsRepository.findAll());
-
+        model.addAttribute("characteristics", characteristicsRepository.findAll()); // eager load with values
         return "seller/add-product";
     }
 
-
-
     @Override
     @Transactional
-    public String saveProduct(String name, String description, Double price, Integer quantity,
-                              String imageUrl, Long subCategoryId,
-                              List<Long> charIds, List<String> charValues,
-                              Model model) {
-        System.out.println("⚠ Entered saveProduct() method");
-
-        if (name == null || name.trim().isEmpty()) {
-            model.addAttribute("error", "Product name is required.");
-            return "seller/add-product";
-        }
-
-        if (productRepository.existsByNameIgnoreCase(name.trim())) {
-            model.addAttribute("error", "Product with this name already exists.");
-            return "seller/add-product";
-        }
-
-        if (price == null || price < 0) {
-            model.addAttribute("error", "Price must be a positive number.");
-            return "seller/add-product";
-        }
-
-        if (quantity == null || quantity < 0) {
-            model.addAttribute("error", "Quantity must be a positive number.");
-            return "seller/add-product";
-        }
-
-        if (charIds == null || charValues == null || charIds.size() != charValues.size()) {
-            model.addAttribute("error", "Mismatch between characteristics and values.");
-            return "seller/add-product";
-        }
-
-        System.out.println("charIds: " + charIds);
-        System.out.println("charValues: " + charValues);
-
-        SubCategory subCategory = subCategoryRepository.findById(subCategoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Subcategory not found."));
-
+    public String createProduct(ProductCreateDto dto) {
         Product product = new Product();
-        product.setName(name.trim());
-        product.setDescription(description.trim());
-        product.setPrice(price);
-        product.setQuantity(quantity);
-        product.setImageUrl(imageUrl);
-        product.setSubCategory(subCategory);
+        product.setName(dto.getName());
+        product.setDescription(dto.getDescription());
+        product.setPrice(dto.getPrice());
+        product.setQuantity(dto.getQuantity());
+        product.setImageUrl(dto.getImageUrl());
         product.setStatus(ProductStatus.ACTIVE);
-        product = productRepository.save(product);
-        System.out.println("✅ Product saved: " + product.getId());
+        product.setSubCategory(subCategoryRepository.findById(dto.getSubCategoryId()).orElseThrow());
 
-        for (int i = 0; i < charIds.size(); i++) {
-            Long charId = charIds.get(i);
-            String value = charValues.get(i);
+        List<ProductCharacteristic> productCharacteristics = new ArrayList<>();
 
-            Characteristics characteristic = characteristicsRepository.findById(charId)
-                    .orElseThrow(() -> new IllegalArgumentException("Characteristic not found."));
+        for (Map.Entry<Long, String> entry : dto.getCharacteristics().entrySet()) {
+            Long charId = entry.getKey();
+            String value = entry.getValue();
 
-            switch (characteristic.getType()) {
-                case NUMBER -> {
-                    try {
-                        Double.parseDouble(value);
-                    } catch (NumberFormatException e) {
-                        model.addAttribute("error", "Value for " + characteristic.getName() + " must be a number.");
-                        return "seller/add-product";
-                    }
-                }
-                case BOOLEAN -> {
-                    if (!(value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false"))) {
-                        model.addAttribute("error", "Value for " + characteristic.getName() + " must be true or false.");
-                        return "seller/add-product";
-                    }
-                }
-                case TEXT, SELECT -> {
-                    if (value.trim().isEmpty()) {
-                        model.addAttribute("error", "Value for " + characteristic.getName() + " cannot be empty.");
-                        return "seller/add-product";
-                    }
-                }
-            }
+            Characteristics characteristic = characteristicsRepository.findById(charId).orElseThrow();
 
             ProductCharacteristic pc = new ProductCharacteristic();
             pc.setProduct(product);
             pc.setCharacteristic(characteristic);
-            pc.setValue(value.trim());
-            productCharacteristicRepository.save(pc);
+            pc.setValue(value);
+
+            productCharacteristics.add(pc);
         }
 
-        return "redirect:/seller-cabinet";
-    }
+        product.setCharacteristics(productCharacteristics);
+        productRepository.save(product);
 
+        return "redirect:/add-product";
+    }
 
 }

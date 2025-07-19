@@ -2,26 +2,97 @@
 <html xmlns:th="https://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Add SubCategory</title>
+    <title>Add SubCategory | PC Market</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            padding: 40px;
+            color: #2c3e50;
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 28px;
+            color: #34495e;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin: 14px 0 6px;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: #7f8c8d;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #2c3e50;
+        }
+    </style>
 </head>
 <body>
-<h1>Add SubCategory</h1>
-<form action="/add-subcategory" method="post">
-    <label for="name">SubCategory Name:</label>
-    <input type="text" name="name" id="name" required><br><br>
 
-    <label for="category">Select Category:</label>
-    <select name="categoryId" id="category" required>
-        <option value="" disabled selected>Select a category</option>
-        <option th:each="cat : ${categories}"
-                th:value="${cat.id}"
-                th:text="${cat.name}">
-        </option>
-    </select><br><br>
+<div class="form-container">
+    <h1>Add SubCategory</h1>
 
-    <button type="submit">Save</button>
-</form>
+    <form action="/add-subcategory" method="post">
+        <label for="name">SubCategory Name:</label>
+        <input type="text" name="name" id="name" required>
 
-<a href="/seller-cabinet">Back</a>
+        <label for="category">Select Category:</label>
+        <select name="categoryId" id="category" required>
+            <option value="" disabled selected>Select a category</option>
+            <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+        </select>
+
+        <button type="submit">Save</button>
+    </form>
+
+    <a href="/seller-cabinet">← Back to Dashboard</a>
+</div>
+
 </body>
 </html>

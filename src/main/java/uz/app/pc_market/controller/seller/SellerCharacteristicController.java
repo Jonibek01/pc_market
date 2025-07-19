@@ -15,4 +15,8 @@ public interface SellerCharacteristicController {
     String createCharacteristic(@RequestParam String name,
                                 @RequestParam CharacteristicType type,
                                 Model model);
+
+    @PostMapping("/add-characteristic-value")
+    String addDefaultValue(@RequestParam Long characteristicId,
+                                  @RequestParam String value);
 }
