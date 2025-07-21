@@ -11,4 +11,9 @@ public interface SellerAddProductService {
     String showAddProductForm(Model model);
 
     String createProduct(ProductCreateDto dto);
+
+    String editProductPage(Long id, Model model);
+    String updateProduct(ProductCreateDto dto);
+    String deleteProduct(Long id);
+
 }

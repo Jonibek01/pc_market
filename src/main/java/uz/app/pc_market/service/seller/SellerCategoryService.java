@@ -8,4 +8,10 @@ import org.springframework.ui.Model;
 public interface SellerCategoryService {
     String getCategories(Model model);
     String createCategory(String name, Model model);
+
+    String editCategoryPage(Long id, Model model);
+
+    String updateCategory(Long id, String name);
+
+    String deleteCategory(Long id,Model model);
 }

@@ -15,5 +15,13 @@ public interface SellerAddProductController {
 
     @PostMapping("/add-product")
     String createProduct(@Valid @ModelAttribute ProductCreateDto dto);
+    @GetMapping("/edit-product/{id}")
+    String editProductPage(@PathVariable Long id, Model model);
+
+    @PostMapping("/edit-product")
+    String updateProduct(@ModelAttribute ProductCreateDto dto);
+
+    @PostMapping("/delete-product/{id}")
+    String deleteProduct(@PathVariable Long id);
 
 }

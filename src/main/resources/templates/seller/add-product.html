@@ -94,8 +94,7 @@
 
 <div class="form-container">
   <h1>Add Product</h1>
-
-  <form th:action="@{/add-product}" method="post">
+  <form th:action="@{/add-product}" method="post" enctype="multipart/form-data">
 
     <label>Name:</label>
     <input type="text" name="name" required>
@@ -109,8 +108,9 @@
     <label>Quantity:</label>
     <input type="number" name="quantity" required>
 
-    <label>Image URL:</label>
-    <input type="text" name="imageUrl">
+    <!-- Image Upload (NO NESTED FORM) -->
+    <label>Product Image:</label>
+    <input type="file" name="image" accept="image/*" required>
 
     <label>SubCategory:</label>
     <select name="subCategoryId" required>
@@ -119,7 +119,6 @@
     </select>
 
     <h3>Characteristics</h3>
-
     <div class="characteristic-block" th:each="c : ${characteristics}">
       <label th:text="${c.name}">RAM</label>
       <select th:name="${'characteristics[' + c.id + ']'}">
@@ -130,6 +129,7 @@
 
     <button type="submit">Save Product</button>
   </form>
+
 
   <a href="/seller-cabinet">← Back to Dashboard</a>
 </div>

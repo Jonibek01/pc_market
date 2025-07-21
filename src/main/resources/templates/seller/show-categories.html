@@ -18,7 +18,7 @@
         }
 
         table {
-            width: 80%;
+            width: 85%;
             margin: 0 auto;
             border-collapse: collapse;
             background-color: #fff;
@@ -42,7 +42,40 @@
             background-color: #f0f8ff;
         }
 
-        a {
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-edit {
+            background-color: #f1c40f;
+            color: #fff;
+        }
+
+        .btn-edit:hover {
+            background-color: #d4ac0d;
+        }
+
+        .btn-delete {
+            background-color: #e74c3c;
+            color: #fff;
+        }
+
+        .btn-delete:hover {
+            background-color: #c0392b;
+        }
+
+        a.back-link {
             display: block;
             text-align: center;
             margin-top: 35px;
@@ -52,7 +85,7 @@
             font-size: 16px;
         }
 
-        a:hover {
+        a.back-link:hover {
             text-decoration: underline;
             color: #2c80b4;
         }
@@ -60,6 +93,11 @@
         @media (max-width: 768px) {
             table {
                 width: 100%;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: flex-start;
             }
         }
     </style>
@@ -73,17 +111,28 @@
     <tr>
         <th>#</th>
         <th>Category Name</th>
+        <th>Actions</th>
     </tr>
     </thead>
     <tbody>
     <tr th:each="category, iterStat : ${categories}">
         <td th:text="${iterStat.count}">1</td>
         <td th:text="${category.name}">Category Name</td>
+        <td>
+            <div class="action-buttons">
+                <form th:action="@{'/edit-category/' + ${category.id}}" method="get">
+                    <button type="submit" class="btn btn-edit">Edit</button>
+                </form>
+                <form th:action="@{'/delete-category/' + ${category.id}}" method="post">
+                    <button type="submit" class="btn btn-delete">Delete</button>
+                </form>
+            </div>
+        </td>
     </tr>
     </tbody>
 </table>
 
-<a href="/seller-cabinet">← Back to Seller Cabinet</a>
+<a href="/seller-cabinet" class="back-link">← Back to Seller Cabinet</a>
 
 </body>
 </html>
