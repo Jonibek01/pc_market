@@ -21,4 +21,20 @@ public class SellerAddProductControllerImpl implements SellerAddProductControlle
         return sellerAddProductService.createProduct(dto);
     }
 
+    @Override
+    public String editProductPage(Long id, Model model) {
+        return sellerAddProductService.editProductPage(id, model);
+    }
+
+    @Override
+    public String updateProduct(ProductCreateDto dto) {
+        return sellerAddProductService.updateProduct(dto);
+    }
+
+    @Override
+    public String deleteProduct(Long id) {
+        return sellerAddProductService.deleteProduct(id);
+    }
+
+
 }

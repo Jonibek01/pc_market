@@ -24,4 +24,19 @@ final SellerCategoryService sellerCategoryService;
         return sellerCategoryService.createCategory(name, model);
     }
 
+    @Override
+    public String editCategoryPage(Long id, Model model) {
+        return sellerCategoryService.editCategoryPage(id, model);
+    }
+
+    @Override
+    public String updateCategory(Long id, String name) {
+        return sellerCategoryService.updateCategory(id, name);
+    }
+
+    @Override
+    public String deleteCategory(Long id, Model model) {
+        return sellerCategoryService.deleteCategory(id, model);
+    }
+
 }

@@ -9,6 +9,8 @@ import uz.app.pc_market.repository.SellerRepository;
 import uz.app.pc_market.service.seller.SellerCategoryService;
 
 import java.util.List;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class SellerCategoryServiceImpl implements SellerCategoryService {
@@ -36,5 +38,45 @@ public class SellerCategoryServiceImpl implements SellerCategoryService {
         sellerRepository.save(category);
         return "redirect:/seller-cabinet";
     }
+
+    @Override
+    public String editCategoryPage(Long id, Model model) {
+        Category category = sellerRepository.findById(id).orElse(null);
+        if (category == null) {
+            model.addAttribute("errorMessage", "Category not found");
+            return "error";
+        }
+        model.addAttribute("category", category);
+        return "seller/edit-category";
+    }
+
+    @Override
+    public String updateCategory(Long id, String name) {
+        Category category = sellerRepository.findById(id).orElse(null);
+        if (category != null) {
+            category.setName(name);
+            sellerRepository.save(category);
+        }
+        return "redirect:/show-categories";
+    }
+
+    @Override
+    public String deleteCategory(Long id, Model model) {
+        Optional<Category> categoryOptional = sellerRepository.findById(id);
+        if (categoryOptional.isEmpty()) {
+            model.addAttribute("errorMessage", "Category not found");
+            return "error";
+        }
+
+        Category category = categoryOptional.get();
+        if (category.getSubCategories() != null && !category.getSubCategories().isEmpty()) {
+            model.addAttribute("errorMessage", "Cannot delete: category has subcategories");
+            return "error";
+        }
+
+        sellerRepository.deleteById(id);
+        return "redirect:/show-categories";
+    }
+
 
 }

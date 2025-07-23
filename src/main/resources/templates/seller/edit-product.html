@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Product | PC Market</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            padding: 40px 30px;
+            color: #2c3e50;
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 5px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h1>Edit Product</h1>
+
+    <form th:action="@{/edit-product}" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="id" th:value="${product.id}" />
+
+        <label>Name:</label>
+        <input type="text" name="name" th:value="${product.name}" required>
+
+        <label>Description:</label>
+        <input type="text" name="description" th:value="${product.description}" required>
+
+        <label>Price:</label>
+        <input type="number" name="price" step="0.01" th:value="${product.price}" required>
+
+        <label>Quantity:</label>
+        <input type="number" name="quantity" th:value="${product.quantity}" required>
+
+        <label>Change Image:</label>
+        <input type="file" name="image" accept="image/*">
+
+        <label>SubCategory:</label>
+        <select name="subCategoryId" required>
+            <option value="" disabled>Select Subcategory</option>
+            <option th:each="s : ${subCategories}"
+                    th:value="${s.id}"
+                    th:selected="${s.id == product.subCategory.id}"
+                    th:text="${s.name}">SubCategory</option>
+        </select>
+
+        <h3>Characteristics</h3>
+        <div class="characteristic-block" th:each="c : ${characteristics}">
+            <label th:text="${c.name}">RAM</label>
+            <select th:name="${'characteristics[' + c.id + ']'}">
+                <option value="" disabled>Choose value</option>
+                <option th:each="v : ${c.values}"
+                        th:value="${v.value}"
+                        th:selected="${selectedCharacteristics[c.id] == v.value}"
+                        th:text="${v.value}">
+                </option>
+            </select>
+        </div>
+
+        <button type="submit">Update Product</button>
+    </form>
+
+
+    <a href="/show-products">← Back to Product List</a>
+</div>
+
+</body>
+</html>
