@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "histories")
+@Builder
 public class History extends ABCEntity{
     @ManyToOne
     private User user;

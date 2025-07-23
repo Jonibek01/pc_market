@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Confirmation</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-blue-100 to-purple-100 font-sans min-h-screen">
+<div class="container mx-auto p-8">
+    <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Confirm Purchase</h2>
+    <div th:if="${error}" class="mb-8 p-4 rounded-lg bg-red-100 text-red-700 shadow-lg">
+        <p th:text="${error}"></p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-xl">
+        <p class="text-gray-700">Total Amount: <span th:text="${totalAmount}"></span> items</p>
+        <p class="text-gray-700">Total Price: $<span th:text="${totalPrice}"></span></p>
+        <p class="text-gray-600 mt-4">Are you sure you want to proceed with the purchase?</p>
+        <form th:action="@{/user/basket/buy}" method="post" class="mt-4">
+            <button type="submit" class="bg-green-500 text-white p-2 rounded hover:bg-green-600">Confirm Purchase</button>
+            <a th:href="@{/user/basket/baskets}" class="text-red-500 hover:underline ml-4">Cancel</a>
+        </form>
+    </div>
+</div>
+</body>
+</html>

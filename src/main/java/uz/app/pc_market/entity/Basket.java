@@ -15,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "baskets")
+@Builder
 public class Basket extends ABCEntity {
 
     @ManyToOne
@@ -25,7 +26,7 @@ public class Basket extends ABCEntity {
 
     private LocalDateTime createdTime = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "basket", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "basket", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     private List<BasketItem> items = new ArrayList<>();
 
     private Double totalPrice = 0.0;

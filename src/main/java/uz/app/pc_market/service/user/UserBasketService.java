@@ -1,13 +1,21 @@
 package uz.app.pc_market.service.user;
 
 import org.springframework.stereotype.Component;
-import org.springframework.ui.Model;
+import uz.app.pc_market.entity.Basket;
+import uz.app.pc_market.entity.BasketItem;
+
+import java.util.List;
 
 @Component
 public interface UserBasketService {
-    String getUserBasket(Long basketId, Model model);
-    String addToBasket(Long productId, Integer quantity,Model model);
-    String deleteFromBasket(Long basketId, Long productId,Model model);
-    String clearBasket(Long basketId,Model model);
-    String buyAllProducts(Long basketId, Double balance,Model model);
+    Basket getUserBasket(Long userId);
+    List<BasketItem> getBasketItems(Long basketId);
+    Basket addProductToBasket(Long productId, Integer quantity, Long userId);
+    Basket deleteFromBasket(Long basketId, Long productId);
+    String clearBasket(Long userId);
+    String buyAllProducts(Long userId);
+    String deleteBasketItem(Long basketItemId);
+    String updateBasketItemQuantity(Long basketItemId, Integer quantity);
+    String validateBasket(Long userId);
+
 }

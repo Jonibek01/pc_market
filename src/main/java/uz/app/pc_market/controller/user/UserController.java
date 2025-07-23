@@ -1,37 +1,78 @@
 package uz.app.pc_market.controller.user;
 
-import org.springframework.stereotype.Component;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uz.app.pc_market.dto.userdto.CommentRequestDTO;
+import uz.app.pc_market.entity.Basket;
 
 @RequestMapping("/user")
 public interface UserController {
-    // Basket-related endpoints
     @GetMapping("/basket/baskets")
-    String getUserBasket(@RequestParam Long userId, Model model);
+    String getBaskets(Model model, HttpSession session);
 
     @PostMapping("/basket/add")
-    String addToBasket(@RequestParam Long productId, @RequestParam Integer quantity, Model model);
+    String addItemToBasket(
+            Model model,
+            @RequestParam("productId") Long productId,
+            @RequestParam("quantity") Integer quantity,
+            HttpSession session
+    );
 
-    @PostMapping("/basket/delete")
-    String deleteFromBasket(@RequestParam Long basketId, @RequestParam Long productId, Model model);
+    @GetMapping("/basket/add")
+    String getOrderMenuPage(
+            Model model,
+            @RequestParam(value = "productId", required = false) Long productId,
+            HttpSession session
+    );
 
     @PostMapping("/basket/clear")
-    String clearBasket(@RequestParam Long userId, Model model);
+    String clearBasket(Model model, HttpSession session);
+
+    @PostMapping("/basket/delete")
+    String deleteBasketItem(@RequestParam("basketItemId") Long basketItemId
+            , RedirectAttributes redirectAttributes
+            , HttpSession session
+    );
 
     @PostMapping("/basket/buy")
-    String buyAllProducts(@RequestParam Long userId, Model model);
+    String buyBasket(RedirectAttributes redirectAttributes,HttpSession session);
 
-    // Comment-related endpoints
+    @GetMapping("/basket/buy")
+    String showBuyConfirmation(Model model);
+
+    @PostMapping("/basket/update-quantity")
+    String updateBasketItemQuantity(
+            @RequestParam("basketItemId") Long basketItemId,
+            @RequestParam("quantity") Integer quantity,
+            RedirectAttributes redirectAttributes,
+            HttpSession session
+    );
+
+    @GetMapping("/basket/details/{basketId}")
+    String getBasketDetails(@PathVariable Long basketId, Model model, HttpSession session);
+
+    @PostMapping("/basket/validate")
+    String validateBasket(RedirectAttributes redirectAttributes, HttpSession session);
+
+
+    @GetMapping("/comment/add-comment")
+    String showAddCommentForm(Model model);
+
     @PostMapping("/comment/add-comment")
     String addUserComment(@RequestParam Long userId, @ModelAttribute CommentRequestDTO commentRequestDTO, BindingResult result, Model model);
 
     @GetMapping("/comment/comments")
     String getAllComments(@RequestParam Long productId, Model model);
 
-    // History-related endpoints
+
     @GetMapping("/history/histories")
     String getUserHistory(@RequestParam Long userId, Model model);
+
+
+    @GetMapping("/products")
+    String getProducts(Model model);
 }

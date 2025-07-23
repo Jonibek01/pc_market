@@ -1,255 +1,356 @@
 package uz.app.pc_market.service.user.impl;
 
+import jakarta.persistence.NoResultException;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
-import uz.app.pc_market.entity.Basket;
-import uz.app.pc_market.entity.BasketItem;
-import uz.app.pc_market.entity.History;
-import uz.app.pc_market.entity.Product;
-import uz.app.pc_market.entity.User;
+import uz.app.pc_market.entity.*;
 import uz.app.pc_market.entity.enums.BasketStatus;
-import uz.app.pc_market.repository.userrepo.BasketRepository;
 import uz.app.pc_market.repository.userrepo.BasketItemRepository;
+import uz.app.pc_market.repository.userrepo.BasketRepository;
+import uz.app.pc_market.repository.userrepo.UserHistoryRepository;
 import uz.app.pc_market.repository.userrepo.UserProductRepository;
 import uz.app.pc_market.repository.userrepo.UserRepository;
 import uz.app.pc_market.service.user.UserBasketService;
-import uz.app.pc_market.service.user.UserHistoryService;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserBasketServiceImpl implements UserBasketService {
-    private final BasketRepository basketRepository;
-    private final BasketItemRepository basketItemRepository;
     private final UserRepository userRepository;
     private final UserProductRepository productRepository;
-    private final UserHistoryService userHistoryService;
+    private final BasketRepository basketRepository;
+    private final BasketItemRepository basketItemRepository;
+    private final UserHistoryRepository historyRepository;
     private final HttpSession session;
 
     @Override
-    public String getUserBasket(Long userId, Model model) {
-        Long currentUserId = getCurrentUserId();
-        if (currentUserId == null) {
-            log.error("User not logged in");
-            model.addAttribute("error", "Please log in to view your basket");
-            return "sign-in";
+    @Transactional
+    public Basket getUserBasket(Long userId) {
+        if (userId == null) {
+            log.warn("User ID is null in getUserBasket");
+            return null;
         }
-        if (!userId.equals(currentUserId)) {
-            log.error("User {} cannot access basket of user {}", currentUserId, userId);
-            model.addAttribute("error", "You cannot access this basket");
-            return "error";
+        try {
+            Basket basket = basketRepository.findByUserIdAndBasketStatus(userId, BasketStatus.ACTIVE);
+            log.info("Fetched basket for userId {}: {}", userId, basket);
+            return basket;
+        } catch (NoResultException e) {
+            log.info("No active basket found for userId {}", userId);
+            return null;
         }
-        Optional<Basket> basketOptional = basketRepository.findByUserIdAndBasketStatus(userId, BasketStatus.ACTIVE);
-        if (basketOptional.isEmpty()) {
-            log.info("No active basket found for user with ID: {}", userId);
-            model.addAttribute("baskets", null);
-        } else {
-            model.addAttribute("baskets", basketOptional.get().getItems());
-            log.info("Basket retrieved successfully for user with ID: {}", userId);
+    }
+
+    @Transactional
+    public List<BasketItem> getBasketItems(Long basketId) {
+        if (basketId == null) {
+            log.warn("Basket ID is null in getBasketItems");
+            return Collections.emptyList();
         }
-        return "user/basket/baskets";
+        Basket basket = basketRepository.findById(basketId).orElse(null);
+        if (basket == null) {
+            log.info("No basket found for basketId {}", basketId);
+            return Collections.emptyList();
+        }
+        List<BasketItem> items = basket.getItems(); // Leverages @OneToMany with FetchType.EAGER
+        log.info("Fetched {} items for basketId {}", items.size(), basketId);
+        return items;
     }
 
     @Override
-    public String addToBasket(Long productId, Integer quantity, Model model) {
-        Long currentUserId = getCurrentUserId();
-        if (currentUserId == null) {
-            log.error("User not logged in");
-            model.addAttribute("error", "Please log in to add items to basket");
-            return "sign-in";
+    @Transactional
+    public Basket addProductToBasket(Long productId, Integer quantity, Long userId) {
+        if (productId == null || quantity == null || quantity <= 0 || userId == null) {
+            log.warn("Invalid input: productId={}, quantity={}, userId={}", productId, quantity, userId);
+            return null;
         }
-        Optional<User> userOptional = userRepository.findById(currentUserId);
-        if (userOptional.isEmpty()) {
-            log.error("User not found: {}", currentUserId);
-            model.addAttribute("error", "User not found");
-            return "error";
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product == null) {
+            log.warn("Product not found with ID: {}", productId);
+            return null;
         }
-        Optional<Product> productOptional = productRepository.findById(productId);
-        if (productOptional.isEmpty()) {
-            log.error("Product not found: {}", productId);
-            model.addAttribute("error", "Product not found");
-            return "error";
-        }
-        if (quantity == null || quantity <= 0) {
-            log.error("Invalid quantity: {}", quantity);
-            model.addAttribute("error", "Invalid quantity");
-            return "error";
-        }
-        Optional<Basket> basketOptional = basketRepository.findByUserIdAndBasketStatus(currentUserId, BasketStatus.ACTIVE);
-        Basket basket;
-        if (basketOptional.isEmpty()) {
-            basket = new Basket();
-            basket.setUser(userOptional.get());
-            basket.setBasketStatus(BasketStatus.ACTIVE);
-            basket.setCreatedTime(LocalDateTime.now());
-            basket.setTotalPrice(0.0);
-            basket.setTotalAmount(0);
-            basket = basketRepository.save(basket);
-        } else {
-            basket = basketOptional.get();
+        Basket basket = getUserBasket(userId);
+        if (basket == null) {
+            User user = userRepository.findById(userId).orElse(null);
+            if (user == null) {
+                user.setId(userId);
+                log.warn("User not found for userId {}, created minimal User object", userId);
+            }
+            basket = Basket.builder()
+                    .user(user)
+                    .basketStatus(BasketStatus.ACTIVE)
+                    .createdTime(LocalDateTime.now())
+                    .totalAmount(0)
+                    .totalPrice(0.0)
+                    .items(new ArrayList<>())
+                    .build();
+            basketRepository.save(basket);
+            log.info("Created new basket for userId {}", userId);
         }
 
-        Optional<BasketItem> existingItem = basket.getItems().stream()
-                .filter(item -> item.getProduct().getId().equals(productId))
-                .findFirst();
-        if (existingItem.isPresent()) {
-            BasketItem item = existingItem.get();
-            item.setQuantity(item.getQuantity() + quantity);
-            item.setUnitPrice(productOptional.get().getPrice() * item.getQuantity());
-            basketItemRepository.save(item);
+        if (basket.getTotalAmount() == null) {
+            basket.setTotalAmount(0);
+            log.warn("Basket totalAmount was null for basketId {}, set to 0", basket.getId());
+        }
+        if (basket.getTotalPrice() == null) {
+            basket.setTotalPrice(0.0);
+            log.warn("Basket totalPrice was null for basketId {}, set to 0.0", basket.getId());
+        }
+
+        BasketItem existingItem = basket.getItems().stream()
+                .filter(item -> item.getProduct() != null && item.getProduct().getId().equals(productId))
+                .findFirst()
+                .orElse(null);
+
+        if (existingItem != null) {
+            existingItem.setQuantity(existingItem.getQuantity() + quantity);
+            existingItem.setUnitPrice(product.getPrice());
+            basketItemRepository.save(existingItem);
+            log.info("Updated existing item for productId {} in basketId {}", productId, basket.getId());
         } else {
-            BasketItem item = new BasketItem();
-            item.setBasket(basket);
-            item.setProduct(productOptional.get());
-            item.setQuantity(quantity);
-            item.setUnitPrice(productOptional.get().getPrice() * quantity);
+            BasketItem item = BasketItem.builder()
+                    .basket(basket)
+                    .product(product)
+                    .quantity(quantity)
+                    .unitPrice(product.getPrice())
+                    .build();
             basket.getItems().add(item);
             basketItemRepository.save(item);
+            log.info("Added new item for productId {} to basketId {}", productId, basket.getId());
         }
 
-        basket.setTotalPrice(basket.getItems().stream().mapToDouble(BasketItem::getUnitPrice).sum());
-        basket.setTotalAmount(basket.getItems().stream().mapToInt(BasketItem::getQuantity).sum());
+        basket.setTotalAmount(basket.getTotalAmount() + quantity);
+        basket.setTotalPrice(basket.getTotalPrice() + (product.getPrice() * quantity));
         basketRepository.save(basket);
+        log.info("Updated basket totals: totalAmount={}, totalPrice={}", basket.getTotalAmount(), basket.getTotalPrice());
 
-        log.info("Product with ID: {} added to basket for user with ID: {}", productId, currentUserId);
-        return "redirect:/user/basket/baskets";
+        return basket;
+
     }
 
     @Override
-    public String deleteFromBasket(Long basketId, Long productId, Model model) {
-        Long currentUserId = getCurrentUserId();
-        if (currentUserId == null) {
-            log.error("User not logged in");
-            model.addAttribute("error", "Please log in to modify basket");
-            return "sign-in";
+    @Transactional
+    public Basket deleteFromBasket(Long basketId, Long productId) {
+      if (basketId == null || productId == null) {
+            log.warn("Invalid input: basketId={}, productId={}", basketId, productId);
+            return null;
         }
-        Optional<Basket> basketOptional = basketRepository.findById(basketId);
-        if (basketOptional.isEmpty()) {
-            log.error("Basket not found: {}", basketId);
-            model.addAttribute("error", "Basket not found");
-            return "error";
+        Basket basket = basketRepository.findById(basketId).orElse(null);
+        if (basket == null) {
+            log.info("No basket found for basketId {}", basketId);
+            return null;
         }
-        Basket basket = basketOptional.get();
-        if (!basket.getUser().getId().equals(currentUserId)) {
-            log.error("User {} cannot delete from basket {}", currentUserId, basketId);
-            model.addAttribute("error", "You cannot delete from this basket");
-            return "error";
+
+        BasketItem item = basket.getItems().stream()
+                .filter(i -> i.getProduct() != null && i.getProduct().getId().equals(productId))
+                .findFirst()
+                .orElse(null);
+        if (item == null) {
+            log.info("No item found for basketId {} and productId {}", basketId, productId);
+            return basket;
         }
-        Optional<BasketItem> itemOptional = basket.getItems().stream()
-                .filter(item -> item.getProduct().getId().equals(productId))
-                .findFirst();
-        if (itemOptional.isEmpty()) {
-            log.info("No item found for product with ID: {}", productId);
-            model.addAttribute("error", "Product not found in basket");
-            return "error";
+
+        // Ensure totalAmount and totalPrice are not null
+        if (basket.getTotalAmount() == null) {
+            basket.setTotalAmount(0);
+            log.warn("Basket totalAmount was null for basketId {}, set to 0", basket.getId());
         }
-        BasketItem item = itemOptional.get();
+        if (basket.getTotalPrice() == null) {
+            basket.setTotalPrice(0.0);
+            log.warn("Basket totalPrice was null for basketId {}, set to 0.0", basket.getId());
+        }
+
         basket.getItems().remove(item);
+        basket.setTotalAmount(Math.max(0, basket.getTotalAmount() - item.getQuantity()));
+        basket.setTotalPrice(Math.max(0.0, basket.getTotalPrice() - (item.getUnitPrice() * item.getQuantity())));
         basketItemRepository.delete(item);
-
-        basket.setTotalPrice(basket.getItems().stream().mapToDouble(BasketItem::getUnitPrice).sum());
-        basket.setTotalAmount(basket.getItems().stream().mapToInt(BasketItem::getQuantity).sum());
         basketRepository.save(basket);
+        log.info("Deleted item for productId {} from basketId {}", productId, basketId);
 
-        log.info("Product with ID: {} deleted from basket with ID: {}", productId, basketId);
-        return "redirect:/user/basket/baskets";
+        return basket;
+    }
+
+    @Transactional
+    @Override
+    public String clearBasket(Long userId) {
+        if (userId == null) {
+            log.warn("User ID is null in clearBasket");
+            return "Invalid user ID";
+        }
+        Basket basket = getUserBasket(userId);
+        if (basket == null) {
+            log.info("No basket found for userId {}", userId);
+            return "No basket found";
+        }
+
+        basketItemRepository.deleteByBasket_Id(basket.getId());
+        basket.getItems().clear();
+        basket.setTotalAmount(0);
+        basket.setTotalPrice(0.0);
+        basketRepository.save(basket);
+        log.info("Cleared basket for userId {}", userId);
+
+        return "Basket cleared";
     }
 
     @Override
-    public String clearBasket(Long userId, Model model) {
-        Long currentUserId = getCurrentUserId();
-        if (currentUserId == null) {
-            log.error("User not logged in");
-            model.addAttribute("error", "Please log in to clear basket");
-            return "sign-in";
+    @Transactional
+    public String buyAllProducts(Long userId) {
+        if (userId == null) {
+            log.warn("User ID is null in buyAllProducts");
+            return "Invalid user ID";
         }
-        if (!userId.equals(currentUserId)) {
-            log.error("User {} cannot clear basket of user {}", currentUserId, userId);
-            model.addAttribute("error", "You cannot clear this basket");
-            return "error";
+        Basket basket = getUserBasket(userId);
+        if (basket == null) {
+            log.info("No basket found for userId {}", userId);
+            return "No basket found";
         }
-        Optional<Basket> basketOptional = basketRepository.findByUserIdAndBasketStatus(userId, BasketStatus.ACTIVE);
-        if (basketOptional.isEmpty()) {
-            log.info("No active basket found for user with ID: {}", userId);
-            model.addAttribute("error", "No active basket found");
-            return "error";
+        if (basket.getItems().isEmpty()) {
+            log.info("Basket is empty for userId {}", userId);
+            return "Basket is empty";
         }
-        Basket basket = basketOptional.get();
-        basketItemRepository.deleteAll(basket.getItems());
-        basket.getItems().clear();
-        basket.setTotalPrice(0.0);
-        basket.setTotalAmount(0);
-        basketRepository.save(basket);
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            log.warn("User not found for userId {}", userId);
+            return "User not found";
+        }
+        if (user.getBalance() == null || user.getBalance() < basket.getTotalPrice()) {
+            log.warn("Insufficient balance for userId {}. Required: {}, Available: {}",
+                    userId, basket.getTotalPrice(), user.getBalance());
+            return "Insufficient balance";
+        }
+        // Validate product stock
+        for (BasketItem item : basket.getItems()) {
+            if (item.getProduct() == null || item.getProduct().getQuantity() < item.getQuantity()) {
+                log.warn("Insufficient stock for product: {}",
+                        item.getProduct() != null ? item.getProduct().getName() : "Unknown");
+                return "Insufficient stock for product: " +
+                        (item.getProduct() != null ? item.getProduct().getName() : "Unknown");
+            }
+        }
+        // Deduct balance and update product quantities
+        user.setBalance(user.getBalance() - basket.getTotalPrice());
+        for (BasketItem item : basket.getItems()) {
+            Product product = item.getProduct();
+            product.setQuantity(product.getQuantity() - item.getQuantity());
+            productRepository.save(product);
+        }
+        // Save purchase history
+        UserHistory history = UserHistory.builder()
+                .user(user)
+                .items(new ArrayList<>(basket.getItems()))
+                .totalPrice(basket.getTotalPrice())
+                .purchaseTime(LocalDateTime.now())
+                .build();
+        historyRepository.save(history);
 
-        log.info("Basket cleared successfully for user with ID: {}", userId);
-        return "redirect:/user/basket/baskets";
+        basketItemRepository.deleteByBasket_Id(basket.getId());
+        basket.getItems().clear();
+        basket.setTotalAmount(0);
+        basket.setTotalPrice(0.0);
+        basketRepository.save(basket);
+        log.info("Purchased all items for userId {}", userId);
+
+        return "Purchase successful";
     }
     @Override
     @Transactional
-    public String buyAllProducts(Long userId, Double balance, Model model) {
-        Long currentUserId = getCurrentUserId();
-        if (currentUserId == null) {
-            model.addAttribute("error", "Please log in to buy products");
-            return "sign-in";
+    public String deleteBasketItem(Long basketItemId) {
+        if (basketItemId == null) {
+            log.warn("Basket item ID is null in deleteBasketItem");
+            return "Invalid basket item ID";
         }
-        if (!userId.equals(currentUserId)) {
-            model.addAttribute("error", "You cannot buy products from this basket");
-            return "error";
+        BasketItem item = basketItemRepository.findById(basketItemId).orElse(null);
+        if (item == null) {
+            log.info("No basket item found for basketItemId {}", basketItemId);
+            return "Basket item not found";
         }
-        Optional<User> userOptional = userRepository.findById(userId);
-        if (userOptional.isEmpty()) {
-            model.addAttribute("error", "User not found");
-            return "error";
+        Basket basket = item.getBasket();
+        if (basket != null) {
+            if (basket.getTotalAmount() == null) {
+                basket.setTotalAmount(0);
+            }
+            if (basket.getTotalPrice() == null) {
+                basket.setTotalPrice(0.0);
+            }
+            basket.getItems().remove(item);
+            basket.setTotalAmount(Math.max(0, basket.getTotalAmount() - item.getQuantity()));
+            basket.setTotalPrice(Math.max(0.0, basket.getTotalPrice() - (item.getUnitPrice() * item.getQuantity())));
+            basketRepository.save(basket);
         }
-        User currentUser = userOptional.get();
-        Optional<Basket> basketOptional = basketRepository.findByUserIdAndBasketStatus(userId, BasketStatus.ACTIVE);
-        if (basketOptional.isEmpty()) {
-            model.addAttribute("error", "No active basket found");
-            return "error";
+        basketItemRepository.delete(item);
+        log.info("Deleted basket item with ID {}", basketItemId);
+        return "Basket item deleted";
+    }
+    @Override
+    @Transactional
+    public String updateBasketItemQuantity(Long basketItemId, Integer quantity) {
+        if (basketItemId == null || quantity == null || quantity <= 0) {
+            log.warn("Invalid input: basketItemId={}, quantity={}", basketItemId, quantity);
+            return "Invalid input";
         }
-        Basket basket = basketOptional.get();
-        if (basket.getItems().isEmpty()) {
-            model.addAttribute("error", "Basket is empty");
-            return "error";
+        BasketItem item = basketItemRepository.findById(basketItemId).orElse(null);
+        if (item == null) {
+            log.info("No basket item found for basketItemId {}", basketItemId);
+            return "Basket item not found";
         }
-        double totalPrice = basket.getTotalPrice();
-        if (currentUser.getBalance() < totalPrice) {
-            model.addAttribute("error", "Insufficient balance");
-            return "error";
+        Basket basket = item.getBasket();
+        if (basket == null) {
+            log.warn("No basket found for basketItemId {}", basketItemId);
+            return "Basket not found";
         }
-        currentUser.setBalance(currentUser.getBalance() - totalPrice);
-        userRepository.save(currentUser);
-
-        for (BasketItem item : basket.getItems()) {
-            History history = new History();
-            history.setUser(currentUser);
-            history.setProduct(item.getProduct());
-            history.setStatus(BasketStatus.CONFIRMED);
-            history.setOrderedTime(LocalDateTime.now());
-            history.setQuantity(item.getQuantity());
-            history.setTotalPrice(item.getUnitPrice());
-            userHistoryService.saveHistory(history, model);
+        if (basket.getTotalAmount() == null) {
+            basket.setTotalAmount(0);
         }
-
-        basketItemRepository.deleteAll(basket.getItems());
-        basket.getItems().clear();
-        basket.setTotalPrice(0.0);
-        basket.setTotalAmount(0);
-        basket.setBasketStatus(BasketStatus.CONFIRMED);
+        if (basket.getTotalPrice() == null) {
+            basket.setTotalPrice(0.0);
+        }
+        int oldQuantity = item.getQuantity();
+        item.setQuantity(quantity);
+        basket.setTotalAmount(basket.getTotalAmount() - oldQuantity + quantity);
+        basket.setTotalPrice(basket.getTotalPrice() - (item.getUnitPrice() * oldQuantity) + (item.getUnitPrice() * quantity));
+        basketItemRepository.save(item);
         basketRepository.save(basket);
-
-        model.addAttribute("success", "All products bought successfully");
-        return "redirect:/user/basket/baskets";
+        log.info("Updated quantity for basketItemId {} to {}", basketItemId, quantity);
+        return "Quantity updated";
+    }
+    @Override
+    @Transactional
+    public String validateBasket(Long userId) {
+        if (userId == null) {
+            log.warn("User ID is null in validateBasket");
+            return "Invalid user ID";
+        }
+        Basket basket = getUserBasket(userId);
+        if (basket == null) {
+            log.info("No basket found for userId {}", userId);
+            return "No basket found";
+        }
+        if (basket.getItems().isEmpty()) {
+            log.info("Basket is empty for userId {}", userId);
+            return "Basket is empty";
+        }
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null || user.getBalance() == null || user.getBalance() < basket.getTotalPrice()) {
+            log.warn("Insufficient balance for userId {}", userId);
+            return "Insufficient balance";
+        }
+        for (BasketItem item : basket.getItems()) {
+            if (item.getProduct() == null || item.getProduct().getQuantity() < item.getQuantity()) {
+                log.warn("Insufficient stock for product: {}", item.getProduct() != null ? item.getProduct().getName() : "Unknown");
+                return "Insufficient stock for product: " + (item.getProduct() != null ? item.getProduct().getName() : "Unknown");
+            }
+        }
+        log.info("Basket validated successfully for userId {}", userId);
+        return "Valid";
     }
 
-    private Long getCurrentUserId() {
-        return (Long) session.getAttribute("userId");
-    }
+
 }

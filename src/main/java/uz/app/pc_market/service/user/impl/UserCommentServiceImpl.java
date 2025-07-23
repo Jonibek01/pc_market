@@ -49,13 +49,13 @@ public class UserCommentServiceImpl implements UserCommentService {
             model.addAttribute("error", "Comment description is required");
             model.addAttribute("commentDto", commentRequestDTO);
             model.addAttribute("products", productRepository.findAll());
-            return "user/comments/add-comment";
+            return "user/comment/add-comment";
         }
         if (commentRequestDTO.getRating() == null || commentRequestDTO.getRating() < 0 || commentRequestDTO.getRating() > 5) {
             model.addAttribute("error", "Rating must be between 0 and 5");
             model.addAttribute("commentDto", commentRequestDTO);
             model.addAttribute("products", productRepository.findAll());
-            return "user/comments/add-comment";
+            return "user/comment/add-comment";
         }
         Comment comment = new Comment();
         comment.setDescription(commentRequestDTO.getDescription());
@@ -64,7 +64,7 @@ public class UserCommentServiceImpl implements UserCommentService {
         comment.setProduct(productOptional.get());
         commentRepository.save(comment);
         model.addAttribute("success", "Comment added successfully");
-        return "redirect:/user/comments/add-comment";
+        return "redirect:/user/comment/add-comment";
     }
 
     @Override
@@ -81,7 +81,7 @@ public class UserCommentServiceImpl implements UserCommentService {
             model.addAttribute("comments", comments);
             model.addAttribute("product", productOptional.get());
         }
-        return "user/comments/comments";
+        return "user/comment/comments";
     }
 
     private Long getCurrentUserId() {
