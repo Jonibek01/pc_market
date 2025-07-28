@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Filter</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-blue-100 to-purple-100 font-sans min-h-screen">
+<div class="container mx-auto p-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Filter Products</h1>
+
+    <!-- Error Message -->
+    <div th:if="${error}" class="mb-8 p-4 rounded-lg bg-red-100 text-red-700 shadow-lg">
+        <span th:text="${error}"></span>
+    </div>
+
+    <!-- Filter Form -->
+    <form th:action="@{/user/products/filter}" th:object="${filterDto}" method="post" class="mb-8 bg-white p-6 rounded-lg shadow-xl">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div th:if="${categories != null and not #lists.isEmpty(categories)}">
+                <label for="categoryId" class="block text-sm font-medium text-gray-700">Category</label>
+                <select id="categoryId" name="categoryId" th:field="*{categoryId}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Select a category</option>
+                    <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+                </select>
+            </div>
+            <div th:if="${categories != null and not #lists.isEmpty(categories)}">
+                <label for="subCategoryId" class="block text-sm font-medium text-gray-700">Subcategory</label>
+                <select id="subCategoryId" name="subCategoryId" th:field="*{subCategoryId}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Select a subcategory</option>
+                    <option th:each="category : ${categories}"
+                            th:each.sub="subCategory : ${category.subCategories}"
+                            th:if="${subCategory.parentId == null}"
+                            th:value="${subCategory.id}"
+                            th:text="${subCategory.name}"></option>
+                </select>
+            </div>
+            <div>
+                <label for="minPrice" class="block text-sm font-medium text-gray-700">Min Price</label>
+                <input type="number" id="minPrice" name="minPrice" th:field="*{minPrice}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" step="0.01" placeholder="0.00">
+            </div>
+            <div>
+                <label for="maxPrice" class="block text-sm font-medium text-gray-700">Max Price</label>
+                <input type="number" id="maxPrice" name="maxPrice" th:field="*{maxPrice}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" step="0.01" placeholder="1000.00">
+            </div>
+            <div th:each="characteristic, stat : ${characteristics}" th:if="${characteristics != null and not #lists.isEmpty(characteristics)}" class="col-span-2">
+                <label th:for="'characteristicIds_' + ${stat.index}" class="block text-sm font-medium text-gray-700" th:text="${characteristic.name}"></label>
+                <select th:name="'characteristicIds[' + ${stat.index} + ']'" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">Select a value</option>
+                    <option th:each="value : ${characteristic.values}" th:if="${value != null}" th:value="${value.id}" th:text="${value.value}"></option>
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="mt-6 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">Filter Products</button>
+    </form>
+
+    <!-- Filtered Products -->
+    <div th:if="${products != null and not #lists.isEmpty(products)}">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Filtered Products</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div th:each="product : ${products}" class="bg-white p-6 rounded-lg shadow-xl transform hover:scale-105 transition-transform duration-300">
+                <h3 th:text="${product.name}" class="text-lg font-semibold text-gray-800"></h3>
+                <p th:text="${product.description}" class="text-gray-600"></p>
+                <p th:text="'Price: $' + ${#numbers.formatDecimal(product.price, 1, 2)}" class="text-gray-600"></p>
+                <p th:text="'Quantity: ' + ${product.quantity}" class="text-gray-600"></p>
+                <a th:href="@{/user/basket/add(productId=${product.id})}" class="text-indigo-500 hover:text-indigo-700 font-semibold">Add to Basket</a>
+            </div>
+        </div>
+    </div>
+    <div th:if="${products == null or #lists.isEmpty(products)}" class="text-gray-600 text-center">
+        No products found.
+    </div>
+
+    <!-- Back to Dashboard -->
+    <a th:href="@{/user}" class="mt-6 inline-block bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">Back to Dashboard</a>
+</div>
+</body>
+</html>

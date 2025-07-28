@@ -13,16 +13,19 @@
         <p th:text="${error}"></p>
     </div>
     <div th:if="${comments != null and not #lists.isEmpty(comments)}" class="bg-white p-6 rounded-lg shadow-xl">
+        <h3 class="text-xl font-semibold mb-4">Comments for <span th:text="${product.name}"></span></h3>
+        <p><strong>Average Rating:</strong> <span th:text="${averageRating != null} ? ${#numbers.formatDecimal(averageRating, 1, 2)} : 'N/A'"></span>/5</p>
         <ul class="list-disc pl-5">
-            <li th:each="comment : ${comments}" class="mb-2">
-                <p><strong>Comment:</strong> <span th:text="${comment.commentText}"></span></p>
-                <p><strong>User:</strong> <span th:text="${comment.user.username}"></span></p>
-                <p><strong>Date:</strong> <span th:text="${#temporals.format(comment.createdDate, 'yyyy-MM-dd HH:mm')}"></span></p>
+            <li th:each="comment : ${comments}" class="mb-4 p-4 border-b border-gray-200">
+                <p><strong>Comment:</strong> <span th:text="${comment.description} ?: 'No description'"></span></p>
+                <p><strong>Rating:</strong> <span th:text="${comment.rating != null} ? ${comment.rating} + '/5' : 'No rating'"></span></p>
+                <p><strong>User:</strong> <span th:text="${comment.user != null and comment.user.name != null} ? ${comment.user.name} : 'Anonymous'"></span></p>
+<!--                <p><strong>Date:</strong> <span th:text="'N/A'"></span></p>-->
             </li>
         </ul>
     </div>
     <div th:if="${comments == null or #lists.isEmpty(comments)}" class="bg-white p-6 rounded-lg shadow-xl">
-        <p class="text-gray-600 text-center">No comments available.</p>
+        <p class="text-gray-600 text-center" th:text="${message != null} ? ${message} : 'No comments available. Be the first to comment!'"></p>
     </div>
     <a th:href="@{/user-cabinet}" class="text-blue-500 hover:underline mt-6 inline-block font-medium">Back to Dashboard</a>
 </div>

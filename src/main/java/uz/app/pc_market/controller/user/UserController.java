@@ -7,6 +7,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uz.app.pc_market.dto.userdto.CommentRequestDTO;
+import uz.app.pc_market.dto.userdto.ProductFilterDTO;
 import uz.app.pc_market.entity.Basket;
 
 @RequestMapping("/user")
@@ -66,13 +67,20 @@ public interface UserController {
     String addUserComment(@RequestParam Long userId, @ModelAttribute CommentRequestDTO commentRequestDTO, BindingResult result, Model model);
 
     @GetMapping("/comment/comments")
-    String getAllComments(@RequestParam Long productId, Model model);
+    String getAllComments(@RequestParam Long productId, Model model,HttpSession session);
 
 
     @GetMapping("/history/histories")
-    String getUserHistory(@RequestParam Long userId, Model model);
+    String getUserHistory(Model model,HttpSession session);
 
 
     @GetMapping("/products")
     String getProducts(Model model);
+
+
+    @GetMapping("/products/filter")
+    String showFilterForm(Model model);
+
+    @PostMapping("/products/filter")
+    String filterProducts(@ModelAttribute("filterDto") ProductFilterDTO filterDto,BindingResult bindingResult, Model model);
 }

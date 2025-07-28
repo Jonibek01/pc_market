@@ -26,7 +26,8 @@ public class UserHistoryServiceImpl implements UserHistoryService {
     private final HttpSession session;
 
     @Override
-    public String getUserHistory(Long userId, Model model) {
+    public String getUserHistory(Model model) {
+        Long userId = (Long) session.getAttribute("userId");
         if (userId == null) {
             log.warn("User ID is null in getUserHistory");
             model.addAttribute("error", "Invalid user ID");

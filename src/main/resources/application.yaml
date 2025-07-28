@@ -13,4 +13,3 @@ spring:
     suffix: .html
     mode: HTML
     cache: false
-

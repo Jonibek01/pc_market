@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,9 +40,9 @@ public class UserBasketServiceImpl implements UserBasketService {
             return null;
         }
         try {
-            Basket basket = basketRepository.findByUserIdAndBasketStatus(userId, BasketStatus.ACTIVE);
+            Optional<Basket> basket = basketRepository.findByUserIdAndBasketStatus(userId, BasketStatus.ACTIVE);
             log.info("Fetched basket for userId {}: {}", userId, basket);
-            return basket;
+            return basket.orElse(null);
         } catch (NoResultException e) {
             log.info("No active basket found for userId {}", userId);
             return null;
@@ -80,8 +81,9 @@ public class UserBasketServiceImpl implements UserBasketService {
         if (basket == null) {
             User user = userRepository.findById(userId).orElse(null);
             if (user == null) {
-                user.setId(userId);
-                log.warn("User not found for userId {}, created minimal User object", userId);
+//                user.setId(userId);
+                log.warn("User not found for userId {}", userId);
+                return null;
             }
             basket = Basket.builder()
                     .user(user)
@@ -138,7 +140,7 @@ public class UserBasketServiceImpl implements UserBasketService {
     @Override
     @Transactional
     public Basket deleteFromBasket(Long basketId, Long productId) {
-      if (basketId == null || productId == null) {
+        if (basketId == null || productId == null) {
             log.warn("Invalid input: basketId={}, productId={}", basketId, productId);
             return null;
         }
@@ -201,65 +203,62 @@ public class UserBasketServiceImpl implements UserBasketService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public String buyAllProducts(Long userId) {
-        if (userId == null) {
-            log.warn("User ID is null in buyAllProducts");
-            return "Invalid user ID";
-        }
-        Basket basket = getUserBasket(userId);
-        if (basket == null) {
-            log.info("No basket found for userId {}", userId);
-            return "No basket found";
-        }
-        if (basket.getItems().isEmpty()) {
-            log.info("Basket is empty for userId {}", userId);
-            return "Basket is empty";
-        }
+        Basket basket = basketRepository.findByUserIdAndBasketStatus(userId, BasketStatus.ACTIVE)
+                .orElseThrow(() -> new IllegalStateException("No active basket found for userId: " + userId));
         User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
-            log.warn("User not found for userId {}", userId);
-            return "User not found";
-        }
-        if (user.getBalance() == null || user.getBalance() < basket.getTotalPrice()) {
-            log.warn("Insufficient balance for userId {}. Required: {}, Available: {}",
-                    userId, basket.getTotalPrice(), user.getBalance());
+        if (user == null || user.getBalance() == null || user.getBalance() < basket.getTotalPrice()) {
             return "Insufficient balance";
         }
-        // Validate product stock
-        for (BasketItem item : basket.getItems()) {
-            if (item.getProduct() == null || item.getProduct().getQuantity() < item.getQuantity()) {
-                log.warn("Insufficient stock for product: {}",
-                        item.getProduct() != null ? item.getProduct().getName() : "Unknown");
-                return "Insufficient stock for product: " +
-                        (item.getProduct() != null ? item.getProduct().getName() : "Unknown");
+
+        try {
+            // Validate product stock
+            for (BasketItem item : new ArrayList<>(basket.getItems())) {
+                if (item.getProduct() == null || item.getProduct().getQuantity() < item.getQuantity()) {
+                    return "Insufficient stock for product: " + (item.getProduct() != null ? item.getProduct().getName() : "Unknown");
+                }
             }
-        }
-        // Deduct balance and update product quantities
-        user.setBalance(user.getBalance() - basket.getTotalPrice());
-        for (BasketItem item : basket.getItems()) {
-            Product product = item.getProduct();
-            product.setQuantity(product.getQuantity() - item.getQuantity());
-            productRepository.save(product);
-        }
-        // Save purchase history
-        UserHistory history = UserHistory.builder()
-                .user(user)
-                .items(new ArrayList<>(basket.getItems()))
-                .totalPrice(basket.getTotalPrice())
-                .purchaseTime(LocalDateTime.now())
-                .build();
-        historyRepository.save(history);
 
-        basketItemRepository.deleteByBasket_Id(basket.getId());
-        basket.getItems().clear();
-        basket.setTotalAmount(0);
-        basket.setTotalPrice(0.0);
-        basketRepository.save(basket);
-        log.info("Purchased all items for userId {}", userId);
+            // Deduct balance and update product quantities
+            user.setBalance(user.getBalance() - basket.getTotalPrice());
+            List<BasketItem> historyItems = new ArrayList<>(basket.getItems()); // Use existing items as references
 
-        return "Purchase successful";
+            // Save purchase history with existing items
+            UserHistory history = UserHistory.builder()
+                    .user(user)
+                    .items(historyItems)
+                    .totalPrice(basket.getTotalPrice())
+                    .purchaseTime(LocalDateTime.now())
+                    .build();
+            historyRepository.save(history);
+
+            // Clear basket
+            basketItemRepository.deleteByBasket_Id(basket.getId());
+            basket.getItems().clear();
+            basket.setBasketStatus(BasketStatus.CONFIRMED);
+            basket.setTotalAmount(0);
+            basket.setTotalPrice(0.0);
+            basketRepository.save(basket);
+
+            Basket newBasket = Basket.builder()
+                    .user(user)
+                    .basketStatus(BasketStatus.ACTIVE)
+                    .totalAmount(0)
+                    .totalPrice(0.0)
+                    .build();
+            basketRepository.save(newBasket);
+
+            userRepository.save(user);
+
+            log.info("Purchased all items for userId {}", userId);
+            return "Purchase successful";
+        } catch (Exception e) {
+            log.error("Purchase failed for userId {}", userId, e);
+            throw e;
+        }
     }
+
     @Override
     @Transactional
     public String deleteBasketItem(Long basketItemId) {
@@ -289,6 +288,7 @@ public class UserBasketServiceImpl implements UserBasketService {
         log.info("Deleted basket item with ID {}", basketItemId);
         return "Basket item deleted";
     }
+
     @Override
     @Transactional
     public String updateBasketItemQuantity(Long basketItemId, Integer quantity) {
@@ -321,6 +321,7 @@ public class UserBasketServiceImpl implements UserBasketService {
         log.info("Updated quantity for basketItemId {} to {}", basketItemId, quantity);
         return "Quantity updated";
     }
+
     @Override
     @Transactional
     public String validateBasket(Long userId) {

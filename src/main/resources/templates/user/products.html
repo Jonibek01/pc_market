@@ -18,6 +18,8 @@
                 <h3 class="text-xl font-semibold" th:text="${product.name}"></h3>
                 <p class="text-gray-600" th:text="${'$' + product.price}"></p>
                 <a th:href="@{'/user/basket/add?productId=' + ${product.id}}" class="text-blue-500 hover:underline mt-2 inline-block">Add to Basket</a>
+                <br>
+                <a th:href="@{/user/comment/comments(productId=${product.id})}" class="text-blue-500 hover:underline">View Comments</a>
             </li>
         </ul>
     </div>

@@ -9,6 +9,6 @@ import java.util.List;
 
 @Component
 public interface UserHistoryService {
-    String getUserHistory(Long userId, Model model);
+    String getUserHistory(Model model);
     List<UserHistory> findByUserId(Long userId);
 }
