@@ -2,6 +2,8 @@ package uz.app.pc_market.controller.user.impl;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -9,17 +11,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uz.app.pc_market.dto.userdto.CommentRequestDTO;
 import uz.app.pc_market.dto.userdto.ProductFilterDTO;
-import uz.app.pc_market.entity.Basket;
-import uz.app.pc_market.entity.BasketItem;
-import uz.app.pc_market.entity.Comment;
-import uz.app.pc_market.entity.Product;
+import uz.app.pc_market.entity.*;
 import uz.app.pc_market.repository.CharacteristicsRepository;
 import uz.app.pc_market.repository.userrepo.CategoryRepository;
 import uz.app.pc_market.repository.userrepo.UserProductRepository;
-import uz.app.pc_market.service.user.UserBasketService;
-import uz.app.pc_market.service.user.UserCommentService;
-import uz.app.pc_market.service.user.UserHistoryService;
-import uz.app.pc_market.service.user.UserProductService;
+import uz.app.pc_market.service.user.*;
 import uz.app.pc_market.controller.user.UserController;
 
 import java.util.Collections;
@@ -36,6 +32,9 @@ public class UserControllerImpl implements UserController {
     private final CategoryRepository categoryRepository;
     private final CharacteristicsRepository characteristicsRepository;
     private final UserProductService userProductService;
+
+    @Autowired
+    private CharacteristicsService characteristicsService;
 
     // Basket-related endpoints (unchanged)
     @Override
@@ -202,7 +201,6 @@ public class UserControllerImpl implements UserController {
         return "redirect:/user/basket/buy";
     }
 
-    // Comment-related endpoints
     @Override
     public String showAddCommentForm(Model model) {
         Long userId = (Long) session.getAttribute("userId");
@@ -257,7 +255,6 @@ public class UserControllerImpl implements UserController {
         return view;
     }
 
-    // History-related endpoints
     @Override
     public String getUserHistory(Model model, HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
@@ -291,12 +288,28 @@ public class UserControllerImpl implements UserController {
         }
         ProductFilterDTO filterDto = new ProductFilterDTO();
         model.addAttribute("filterDto", filterDto);
-        model.addAttribute("categories", categoryRepository.findAll());
-        model.addAttribute("characteristics", characteristicsRepository.findAll());
-        model.addAttribute("products", productRepository.findAll());
+        List<Category> categories = categoryRepository.findAllWithSubCategories();
+        categories.forEach(category -> {
+            category.getSubCategories().forEach(sc -> {
+                if (sc.getCategory() != null) {
+                    Hibernate.initialize(sc.getCategory().getParentCategory());
+                }
+            });
+        });
+        model.addAttribute("categories", categories);
+        List<Characteristics> characteristics = characteristicsService.findAllWithValues();
+        model.addAttribute("characteristics", characteristics);
         System.out.println("filterDto: " + filterDto);
-        System.out.println("categories size: " + categoryRepository.findAll().size());
-        System.out.println("characteristics size: " + characteristicsRepository.findAll().size());
+        System.out.println("categories size: " + categories.size());
+        System.out.println("characteristics size: " + characteristics.size());
+        categories.forEach(category -> {
+            System.out.println("Category: " + category.getName() + ", Parent: " +
+                    (category.getParentCategory() != null ? category.getParentCategory().getName() : "none"));
+            category.getSubCategories().forEach(sc ->
+                    System.out.println("  SubCategory: " + sc.getName() + ", Category: " +
+                            (sc.getCategory() != null ? sc.getCategory().getName() : "none")));
+        });
+        characteristics.forEach(c -> System.out.println("Characteristic: " + c.getName() + ", Values: " + c.getValues()));
         return "user/products/filter";
     }
 
@@ -309,20 +322,54 @@ public class UserControllerImpl implements UserController {
         }
         if (result.hasErrors()) {
             model.addAttribute("error", "Invalid filter parameters: " + result.getAllErrors());
-            model.addAttribute("categories", categoryRepository.findAll());
-            model.addAttribute("characteristics", characteristicsRepository.findAll());
+            List<Category> categories = categoryRepository.findAllWithSubCategories();
+            categories.forEach(category -> {
+                category.getSubCategories().forEach(sc -> {
+                    if (sc.getCategory() != null) {
+                        Hibernate.initialize(sc.getCategory().getParentCategory());
+                    }
+                });
+            });
+            model.addAttribute("categories", categories);
+            List<Characteristics> characteristics = characteristicsService.findAllWithValues();
+            model.addAttribute("characteristics", characteristics);
             model.addAttribute("products", productRepository.findAll());
             model.addAttribute("filterDto", filterDto);
+            categories.forEach(category -> {
+                System.out.println("Category: " + category.getName() + ", Parent: " +
+                        (category.getParentCategory() != null ? category.getParentCategory().getName() : "none"));
+                category.getSubCategories().forEach(sc ->
+                        System.out.println("  SubCategory: " + sc.getName() + ", Category: " +
+                                (sc.getCategory() != null ? sc.getCategory().getName() : "none")));
+            });
+            characteristics.forEach(c -> System.out.println("Characteristic: " + c.getName() + ", Values: " + c.getValues()));
             return "user/products/filter";
         }
         List<Product> filteredProducts = userProductService.filterProducts(filterDto);
         model.addAttribute("products", filteredProducts);
-        model.addAttribute("categories", categoryRepository.findAll());
-        model.addAttribute("characteristics", characteristicsRepository.findAll());
+        List<Category> categories = categoryRepository.findAllWithSubCategories();
+        categories.forEach(category -> {
+            category.getSubCategories().forEach(sc -> {
+                if (sc.getCategory() != null) {
+                    Hibernate.initialize(sc.getCategory().getParentCategory());
+                }
+            });
+        });
+        model.addAttribute("categories", categories);
+        List<Characteristics> characteristics = characteristicsService.findAllWithValues();
+        model.addAttribute("characteristics", characteristics);
         model.addAttribute("filterDto", filterDto);
         if (filteredProducts.isEmpty()) {
             model.addAttribute("error", "No products found matching the filter criteria");
         }
+        categories.forEach(category -> {
+            System.out.println("Category: " + category.getName() + ", Parent: " +
+                    (category.getParentCategory() != null ? category.getParentCategory().getName() : "none"));
+            category.getSubCategories().forEach(sc ->
+                    System.out.println("  SubCategory: " + sc.getName() + ", Category: " +
+                            (sc.getCategory() != null ? sc.getCategory().getName() : "none")));
+        });
+        characteristics.forEach(c -> System.out.println("Characteristic: " + c.getName() + ", Values: " + c.getValues()));
         return "user/products/filter";
     }
 }
