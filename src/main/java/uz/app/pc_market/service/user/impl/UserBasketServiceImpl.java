@@ -81,7 +81,6 @@ public class UserBasketServiceImpl implements UserBasketService {
         if (basket == null) {
             User user = userRepository.findById(userId).orElse(null);
             if (user == null) {
-//                user.setId(userId);
                 log.warn("User not found for userId {}", userId);
                 return null;
             }
@@ -159,7 +158,6 @@ public class UserBasketServiceImpl implements UserBasketService {
             return basket;
         }
 
-        // Ensure totalAmount and totalPrice are not null
         if (basket.getTotalAmount() == null) {
             basket.setTotalAmount(0);
             log.warn("Basket totalAmount was null for basketId {}, set to 0", basket.getId());
@@ -213,18 +211,15 @@ public class UserBasketServiceImpl implements UserBasketService {
         }
 
         try {
-            // Validate product stock
             for (BasketItem item : new ArrayList<>(basket.getItems())) {
                 if (item.getProduct() == null || item.getProduct().getQuantity() < item.getQuantity()) {
                     return "Insufficient stock for product: " + (item.getProduct() != null ? item.getProduct().getName() : "Unknown");
                 }
             }
 
-            // Deduct balance and update product quantities
             user.setBalance(user.getBalance() - basket.getTotalPrice());
-            List<BasketItem> historyItems = new ArrayList<>(basket.getItems()); // Use existing items as references
+            List<BasketItem> historyItems = new ArrayList<>(basket.getItems());
 
-            // Save purchase history with existing items
             UserHistory history = UserHistory.builder()
                     .user(user)
                     .items(historyItems)
@@ -233,7 +228,6 @@ public class UserBasketServiceImpl implements UserBasketService {
                     .build();
             historyRepository.save(history);
 
-            // Clear basket
             basketItemRepository.deleteByBasket_Id(basket.getId());
             basket.getItems().clear();
             basket.setBasketStatus(BasketStatus.CONFIRMED);

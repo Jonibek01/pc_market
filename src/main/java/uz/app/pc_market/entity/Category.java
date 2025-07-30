@@ -18,6 +18,6 @@ public class Category extends ABCEntity{
     @ManyToOne
     @JoinColumn(name = "parent_id")
     private Category parentCategory;
-    @OneToMany(mappedBy = "category")
+    @OneToMany(mappedBy = "category",fetch = FetchType.EAGER)
     private List<SubCategory> subCategories;
 }

@@ -1,14 +1,12 @@
 package uz.app.pc_market.controller.user;
 
 import jakarta.servlet.http.HttpSession;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uz.app.pc_market.dto.userdto.CommentRequestDTO;
 import uz.app.pc_market.dto.userdto.ProductFilterDTO;
-import uz.app.pc_market.entity.Basket;
 
 @RequestMapping("/user")
 public interface UserController {
