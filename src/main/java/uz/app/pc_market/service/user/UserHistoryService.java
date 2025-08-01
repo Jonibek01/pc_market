@@ -1,9 +1,14 @@
 package uz.app.pc_market.service.user;
 
-import org.springframework.stereotype.Service;
-import uz.app.pc_market.dto.userdto.ResponseMessage;
+import org.springframework.stereotype.Component;
+import org.springframework.ui.Model;
+import uz.app.pc_market.entity.History;
+import uz.app.pc_market.entity.UserHistory;
 
-@Service
+import java.util.List;
+
+@Component
 public interface UserHistoryService {
-    ResponseMessage getUserHistory(Long userId);
+    String getUserHistory(Model model);
+    List<UserHistory> findByUserId(Long userId);
 }

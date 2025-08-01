@@ -8,4 +8,5 @@ import lombok.Setter;
 public class CommentRequestDTO {
     private String description;
     private Double rating;
+    private Long productId;
 }

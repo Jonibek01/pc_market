@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Item to Basket</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-blue-100 to-purple-100 font-sans min-h-screen">
+<div class="container mx-auto p-8">
+    <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Add Item to Basket</h2>
+
+    <div th:if="${error}" class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <p th:text="${error}"></p>
+    </div>
+
+    <form th:action="@{/user/basket/add}" method="post" class="bg-white p-6 rounded-lg shadow-xl">
+        <h3 class="text-xl font-semibold mb-2" th:text="${product.name}"></h3>
+        <input type="hidden" name="productId" th:value="${product.id}"/>
+
+        <div class="mb-4">
+            <label for="quantity" class="block text-gray-700 font-semibold">Quantity</label>
+            <input type="number" id="quantity" name="quantity" min="1" value="1" class="border p-2 rounded w-full" required>
+        </div>
+
+        <div class="flex items-center">
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add</button>
+            <a th:href="@{/user/products}" class="ml-4 text-blue-500 hover:underline">Cancel</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

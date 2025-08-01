@@ -10,6 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Entity
 @Table(name = "basket_items")
+@Builder
 public class BasketItem extends ABCEntity {
 
     @ManyToOne

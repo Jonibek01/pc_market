@@ -1,5 +1,6 @@
 package uz.app.pc_market.controller.impl;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,4 +46,5 @@ public class SignUpControllerImpl implements SignUpController {
         System.out.println("user successfully saved " + user);
         return "redirect:/sign-in";
     }
+
 }

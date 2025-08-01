@@ -1,63 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>User Cabinet</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    body {
-      background-color: #f4f6f8;
-      color: #2c3e50;
-      padding: 40px;
-    }
-
-    h1 {
-      margin-bottom: 30px;
-      font-size: 32px;
-      text-align: center;
-    }
-
-    .nav-links {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .nav-links a {
-      display: block;
-      text-align: center;
-      padding: 15px;
-      background-color: #3498db;
-      color: white;
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: 500;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-    }
-
-    .nav-links a:hover {
-      background-color: #2c80b4;
-      transform: translateY(-2px);
-    }
-  </style>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-<h1>User Cabinet</h1>
-<div class="nav-links">
-    <a href="/add-card">Buy Something Else</a>
-    <a href="/cards">My Card</a>
-    <a href="/delete-card">Leave comment to some product</a>
-    <a href="/update-card">About my history</a>
+<body class="bg-gradient-to-br from-blue-100 to-purple-100 font-sans min-h-screen">
+<div class="container mx-auto p-8">
+  <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">User Dashboard</h2>
+  <!-- Error Message -->
+  <div th:if="${error}" class="mb-8 p-4 rounded-lg bg-red-100 text-red-700 shadow-lg">
+    <p th:text="${error}"></p>
+  </div>
+  <!-- User Information -->
+  <div th:if="${user != null}" class="bg-white p-6 rounded-lg shadow-xl mb-8 transform hover:scale-105 transition-transform duration-300">
+    <h3 class="text-2xl font-semibold text-gray-800 mb-4">Welcome, <span th:text="${user.name}">User Name</span>!</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <p class="text-gray-600"><span class="font-medium">Email:</span> <span th:text="${user.email}">user@example.com</span></p>
+      <p class="text-gray-600"><span class="font-medium">Balance:</span> $<span th:text="${#numbers.formatDecimal(user.balance, 1, 2)}">0.00</span></p>
+    </div>
+  </div>
+  <!-- Navigation Links -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <a th:href="@{/user/products}" class="bg-indigo-500 text-white p-6 rounded-lg shadow-lg hover:bg-indigo-600 transition-colors duration-300 flex items-center justify-center">
+      <div class="text-center">
+        <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+        <span class="text-lg font-semibold">Browse Products</span>
+      </div>
+    </a>
+    <a th:href="@{/user/products/filter}" class="bg-teal-500 text-white p-6 rounded-lg shadow-lg hover:bg-teal-600 transition-colors duration-300 flex items-center justify-center">
+      <div class="text-center">
+        <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1m-2 0v5h-4m4 0l-4-4m4 4l-4 4m-6-8v5h4m-4 0l4-4m-4 4l4 4"></path></svg>
+        <span class="text-lg font-semibold">Filter Products</span>
+      </div>
+    </a>
+    <a th:href="@{/user/basket/baskets(userId=${session.userId})}" class="bg-blue-500 text-white p-6 rounded-lg shadow-lg hover:bg-blue-600 transition-colors duration-300 flex items-center justify-center">
+      <div class="text-center">
+        <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+        <span class="text-lg font-semibold">Shopping Basket</span>
+      </div>
+    </a>
+    <a th:href="@{/user/comment/add-comment}" class="bg-green-500 text-white p-6 rounded-lg shadow-lg hover:bg-green-600 transition-colors duration-300 flex items-center justify-center">
+      <div class="text-center">
+        <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path></svg>
+        <span class="text-lg font-semibold">Add Comment</span>
+      </div>
+    </a>
+    <a th:href="@{/user/comment/comments(productId=${product?.id})}" class="bg-purple-500 text-white p-6 rounded-lg shadow-lg hover:bg-purple-600 transition-colors duration-300 flex items-center justify-center">
+      <div class="text-center">
+        <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5v-2a2 2 0 012-2h10a2 2 0 012 2v2h-4m-6 4h6"></path></svg>
+        <span class="text-lg font-semibold">View Comments</span>
+      </div>
+    </a>
+    <a th:href="@{/user/history/histories(userId=${session.userId})}" class="bg-yellow-500 text-white p-6 rounded-lg shadow-lg hover:bg-yellow-600 transition-colors duration-300 flex items-center justify-center">
+      <div class="text-center">
+        <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span class="text-lg font-semibold">Purchase History</span>
+      </div>
+    </a>
+    <a th:href="@{/user/profile}" class="bg-gray-500 text-white p-6 rounded-lg shadow-lg hover:bg-gray-600 transition-colors duration-300 flex items-center justify-center">
+      <div class="text-center">
+        <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span class="text-lg font-semibold">Profile Settings</span>
+      </div>
+    </a>
+    <a th:href="@{/sign-out}" class="bg-red-500 text-white p-6 rounded-lg shadow-lg hover:bg-red-600 transition-colors duration-300 flex items-center justify-center">
+      <div class="text-center">
+        <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+        <span class="text-lg font-semibold">Sign Out</span>
+      </div>
+    </a>
+  </div>
 </div>
-
 </body>
 </html>

@@ -18,4 +18,7 @@ public interface SignInController {
     String signIn(@RequestParam("username") String username,
                   @RequestParam("password") String password,
                   Model model, HttpSession session);
+
+    @PostMapping("/logout")
+    String logout(HttpSession session);
 }

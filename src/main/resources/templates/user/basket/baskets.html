@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Basket</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Custom styles for enhanced aesthetics */
+        body {
+            background: linear-gradient(135deg, #e0e7ff, #d8b4fe);
+            font-family: 'Inter', sans-serif;
+        }
+        .basket-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .basket-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .btn {
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        .table-row {
+            transition: background-color 0.2s ease;
+        }
+        .table-row:hover {
+            background-color: #f9fafb;
+        }
+        .error-message {
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @media (max-width: 640px) {
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100">
+<div class="container mx-auto p-4 sm:p-8 max-w-4xl">
+    <h2 class="text-4xl font-extrabold text-gray-800 mb-8 text-center tracking-tight">
+        <i class="fas fa-shopping-basket mr-2"></i> My Basket
+    </h2>
+
+    <!-- Error Message -->
+    <div th:if="${error}" class="mb-6 bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-md error-message">
+        <p th:text="${error}"></p>
+    </div>
+
+    <!-- Basket Items -->
+    <div th:if="${basketItems != null and !basketItems.isEmpty()}" class="bg-white p-6 rounded-xl shadow-lg basket-card">
+        <div class="overflow-x-auto">
+            <table class="w-full mb-6 border-collapse">
+                <thead class="bg-gray-100 text-gray-600 uppercase text-sm">
+                <tr>
+                    <th class="p-4 text-left">Product</th>
+                    <th class="p-4 text-left">Quantity</th>
+                    <th class="p-4 text-left">Unit Price</th>
+                    <th class="p-4 text-left">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${basketItems}" class="border-b table-row">
+                    <td class="p-4">
+                        <span class="text-gray-800 font-medium" th:text="${item.product != null ? item.product.name : 'No Product'}"></span>
+                    </td>
+                    <td class="p-4">
+                        <form th:action="@{/user/basket/update-quantity}" method="post" class="flex items-center space-x-2">
+                            <input type="hidden" name="basketItemId" th:value="${item.id}"/>
+                            <input type="number" name="quantity" th:value="${item.quantity}" min="1" class="w-16 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"/>
+                            <button type="submit" class="btn bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700">
+                                <i class="fas fa-sync-alt mr-1"></i> Update
+                            </button>
+                        </form>
+                    </td>
+                    <td class="p-4" th:text="${item.unitPrice != null ? #numbers.formatCurrency(item.unitPrice) : 'N/A'}"></td>
+                    <td class="p-4">
+                        <form th:action="@{/user/basket/delete}" method="post">
+                            <input type="hidden" name="basketItemId" th:value="${item.id}"/>
+                            <button type="submit" class="btn text-red-500 hover:text-red-700 font-medium">
+                                <i class="fas fa-trash-alt mr-1"></i> Remove
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Basket Summary -->
+        <div class="mt-6 space-y-4">
+            <div class="flex justify-between text-lg text-gray-700">
+                <span>Total Items:</span>
+                <span class="font-semibold" th:text="${basket != null and basket.totalAmount != null ? basket.totalAmount : 0}"></span>
+            </div>
+            <div class="flex justify-between text-lg text-gray-700">
+                <span>Total Price:</span>
+                <span class="font-semibold" th:text="${basket != null and basket.totalPrice != null ? #numbers.formatCurrency(basket.totalPrice) : 'N/A'}"></span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-6 flex flex-wrap gap-4 justify-center">
+            <form th:action="@{/user/basket/validate}" method="post">
+                <button type="submit" class="btn bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700">
+                    <i class="fas fa-check-circle mr-2"></i> Validate Basket
+                </button>
+            </form>
+            <form th:action="@{/user/basket/clear}" method="post">
+                <button type="submit" class="btn bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700">
+                    <i class="fas fa-trash mr-2"></i> Clear Basket
+                </button>
+            </form>
+            <form th:action="@{/user/basket/buy}" method="post">
+                <button type="submit" class="btn bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+                    <i class="fas fa-shopping-cart mr-2"></i> Buy All
+                </button>
+            </form>
+            <a th:href="@{/user/basket/details/{id}(id=${basket.id})}" class="btn bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700">
+                <i class="fas fa-info-circle mr-2"></i> View Details
+            </a>
+        </div>
+    </div>
+
+    <!-- Empty Basket -->
+    <div th:if="${basketItems == null or basketItems.isEmpty()}" class="bg-white p-8 rounded-xl shadow-lg text-center basket-card">
+        <p class="text-gray-600 text-lg mb-4">Your basket is empty.</p>
+        <a th:href="@{/user/products}" class="btn inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+            <i class="fas fa-store mr-2"></i> Go to Products
+        </a>
+    </div>
+
+    <!-- Navigation Links -->
+    <div class="mt-8 text-center space-y-4">
+        <a th:href="@{/user/products}" class="text-blue-600 hover:text-blue-800 font-medium">
+            <i class="fas fa-arrow-left mr-2"></i> Continue Shopping
+        </a>
+        <a th:href="@{/user-cabinet}" class="block text-blue-600 hover:text-blue-800 font-medium">
+            <i class="fas fa-tachometer-alt mr-2"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Google Fonts for Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</body>
+</html>
